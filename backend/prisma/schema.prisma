@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    Int       @id @default(autoincrement())
+  email                 String    @unique
+  name                  String
+  phone                 String?
+  address               String?
+  role                  String    @default("User") // User, Partner, Admin
+  tier                  String    @default("Gold") // Gold, Platinum, Diamond
+  status                String    @default("Active") // Active, Suspended
+  verificationStatus    String    @default("Unverified") // Unverified, Pending, Verified, Rejected
+  walletBalance         Float     @default(0)
+  suspensionReason      String?
+  adminNotes            String?
+  verificationDocs      String?   // JSON string: BVN, ID docs, CAC docs, etc.
+  searchHistory         String?   // JSON string: Array of search queries
+  location              String?
+  joined                DateTime  @default(now())
+  lastActive            DateTime  @default(now())
+  avgSpend              Float     @default(0)
+  rentalHistoryCount    Int       @default(0)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relations
+  products              Product[]
+  orders                Order[]
+  wishlistItems         WishlistItem[]
+  transactions          Transaction[]
+  reviews               Review[]
+  cartItems             CartItem[]
+}
+
+model Product {
+  id                    String    @id @default(cuid())
+  name                  String
+  brand                 String
+  category              String    // Women, Men, Accessories, Watches, Bags
+  rentalPrice           Float
+  retailPrice           Float
+  buyPrice              Float?
+  isForSale             Boolean   @default(false)
+  ownerId               Int?
+  description           String?
+  color                 String?
+  occasion              String?
+  condition             String?
+  rentalCount           Int       @default(0)
+  autoSellAfterRentals  Int?
+  rentalDuration        Int?      // days
+  availableSizes        String?   // JSON string: Array of sizes
+  images                String?   // JSON string: Array of image URLs
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relations
+  owner                 User?     @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  orderItems            OrderItem[]
+  reviews               Review[]
+  wishlistItems         WishlistItem[]
+  cartItems             CartItem[]
+}
+
+model Order {
+  id                    String    @id @default(cuid())
+  userId                Int
+  userName              String
+  date                  DateTime  @default(now())
+  total                 Float
+  status                String    @default("Processing") // Processing, Pending Approval, Accepted, Shipped, Completed, Returned, Cancelled, Rejected
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relations
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items                 OrderItem[]
+  transactions          Transaction[]
+}
+
+model OrderItem {
+  id                    String    @id @default(cuid())
+  orderId               String
+  productId             String
+  quantity              Int
+  status                String    @default("Pending Approval") // Same as OrderStatus
+  rentalStartDate       DateTime?
+  rentalEndDate         DateTime?
+  createdAt             DateTime  @default(now())
+
+  // Relations
+  order                 Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product               Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model CartItem {
+  id                    String    @id @default(cuid())
+  userId                Int
+  productId             String
+  quantity              Int
+  rentalStartDate       DateTime?
+  rentalEndDate         DateTime?
+  createdAt             DateTime  @default(now())
+
+  // Relations
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product               Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model WishlistItem {
+  id                    String    @id @default(cuid())
+  userId                Int
+  productId             String
+  createdAt             DateTime  @default(now())
+
+  // Relations
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product               Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model Review {
+  id                    String    @id @default(cuid())
+  productId             String
+  userId                Int
+  rating                Int       // 1-5
+  comment               String?
+  date                  DateTime  @default(now())
+
+  // Relations
+  product               Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Transaction {
+  id                    String    @id @default(cuid())
+  userId                Int
+  orderId               String?
+  type                  String    // Credit, Debit, Withdrawal, Fee
+  amount                Float
+  description           String
+  date                  DateTime  @default(now())
+  status                String    @default("Pending") // Pending, Completed, Failed
+  paymentMethod         String?   // Wallet, Bank Transfer, Card ending ****
+  createdAt             DateTime  @default(now())
+
+  // Relations
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order                 Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+}
