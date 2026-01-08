@@ -226,15 +226,15 @@ export const Catalog: React.FC = () => {
           
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                 <div className="w-full">
-                    <label className="text-[10px] text-cream/50 uppercase tracking-widest mb-2 block font-bold">Category</label>
+                    <label className="text-[10px] text-cream/50 uppercase tracking-widest mb-2 block font-bold">Testing</label>
                     <div className="relative">
                         <select 
                             value={filters.category}
                             onChange={(e) => updateFilter('category', e.target.value)}
                             className="w-full bg-white/5 border border-white/10 text-cream px-3 py-2.5 text-sm focus:border-golden-orange outline-none appearance-none rounded-sm cursor-pointer"
                         >
-                            <option value="All">All Categories</option>
-                            {Object.values(Category).map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                            <option  className='bg-red' value="All">All Categories</option>
+                            {Object.values(Category).map(cat => <option className='bg-red' key={cat} value={cat}>{cat}</option>)}
                         </select>
                         <ChevronDown size={12} className="absolute right-3 top-3 text-cream/30 pointer-events-none"/>
                     </div>
