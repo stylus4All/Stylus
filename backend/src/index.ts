@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import { prisma } from './prisma';
 import userRoutes from './routes/users';
 import productRoutes from './routes/products';
@@ -13,6 +14,9 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
+
+// Enable CORS for frontend origin (set FRONTEND_URL in .env for production)
+app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
 
 // Health check
 app.get('/health', (_req: Request, res: Response) => {

@@ -1,8 +1,11 @@
-const API_BASE_URL = 'http://localhost:4000';
+const API_BASE_URL = (import.meta.env as any).VITE_API_BASE_URL || 'http://localhost:4000';
 
 // Helper function for API calls
 async function apiCall(endpoint: string, options: RequestInit = {}) {
-  const url = `${API_BASE_URL}${endpoint}`;
+  // Ensure the final request targets the backend's `/api` prefix.
+  const base = API_BASE_URL.replace(/\/$/, '');
+  const path = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
+  const url = `${base}${path}`;
   const headers = {
     'Content-Type': 'application/json',
     ...options.headers,
