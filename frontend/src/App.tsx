@@ -18,6 +18,9 @@ import { WishlistProvider } from './context/WishlistContext';
 import { OrderProvider } from './context/OrderContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
+
+
+
 function App() {
   return (
     <AuthProvider>
@@ -76,6 +79,7 @@ function App() {
         </CartProvider>
       </ProductProvider>
     </AuthProvider>
+  
   );
 }
 
