@@ -15,10 +15,10 @@ export const Home: React.FC = () => {
 
   // --- Hero Slider Logic ---
   const heroImages = [
-   "/Velvet.jpg",
-   "/Hanger 2.jpg",
-   "/Short gown.jpg",
-   "/Tuxedo.jpg",
+   "/Beaded.jpeg",
+   "/Pearl.jpeg",
+   "/Asoke.jpeg",
+   "/Red_suit.jpeg",
   ];
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -37,9 +37,9 @@ export const Home: React.FC = () => {
   ];
 
   const team = [
-    { name: "Victoria Vance", role: "Founder & CEO", img: "/Suit_lady.jpg" },
-    { name: "Julian Banks", role: "Head Curator", img: "" },
-    { name: "Elena Rossi", role: "Chief Stylist", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=600&auto=format&fit=crop" }
+    { name: "Victoria Vance", role: "Founder & CEO", img: "/Austin.jpeg" },
+    { name: "Julian Banks", role: "Head Curator", img: "/Suit_guy.jpg" },
+    { name: "Elena Rossi", role: "Chief Stylist", img: "/Scarf.jpeg" }
   ];
 
   const quickAddToCart = (product: Product) => {
@@ -118,7 +118,7 @@ export const Home: React.FC = () => {
                   <div className="relative w-full max-w-md aspect-square bg-gradient-to-tr from-golden-orange to-espresso rounded-full p-1 animate-pulse-slow">
                      <div className="w-full h-full bg-[#1a0a04] rounded-full flex items-center justify-center relative overflow-hidden">
                         <Sparkles size={120} className="text-golden-orange animate-spin-slow opacity-80" />
-                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80')] opacity-20 bg-cover mix-blend-overlay"></div>
+                        <div className="absolute inset-0 bg-[url('/Meta.jpeg')] opacity-20 bg-cover mix-blend-overlay"></div>
                      </div>
                   </div>
                </div>
