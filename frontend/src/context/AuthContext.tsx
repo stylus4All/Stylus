@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Role, VerificationStatus, Transaction } from '../types';
+import { authAPI } from '../services/api';
 
 // Extended User Interface
 export interface RegisteredUser {
@@ -39,9 +40,9 @@ interface AuthContextType {
   currentUser: RegisteredUser | null;
   registeredUsers: RegisteredUser[];
   transactions: Transaction[];
-  login: (email: string, password?: string) => boolean;
+  login: (email: string, password?: string) => Promise<boolean>;
   logout: () => void;
-  registerUser: (name: string, email: string, role?: Role) => void;
+  registerUser: (name: string, email: string, password: string, role?: Role) => Promise<void>;
   updateUserStatus: (id: string, newStatus: 'Active' | 'Suspended', reason?: string) => void;
   updateUserRole: (id: string, newRole: Role) => void;
   updateUserNotes: (id: string, notes: string) => void;
@@ -62,9 +63,9 @@ const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   registeredUsers: [],
   transactions: [],
-  login: () => false,
+  login: async () => false,
   logout: () => {},
-  registerUser: () => {},
+  registerUser: async () => {},
   updateUserStatus: () => {},
   updateUserRole: () => {},
   updateUserNotes: () => {},
@@ -176,6 +177,39 @@ const MOCK_TRANSACTIONS: Transaction[] = [
     { id: 'tx-3', userId: '4', userName: 'Victoria Sterling', type: 'Credit', amount: 1500, description: 'Wallet Deposit', date: 'Feb 15, 2024', status: 'Completed', paymentMethod: 'Card ending 8811' },
 ];
 
+// Helper function to map backend user to frontend RegisteredUser format
+const mapBackendUserToRegisteredUser = (backendUser: any): RegisteredUser => {
+  const verificationDocs = typeof backendUser.verificationDocs === 'string' 
+    ? JSON.parse(backendUser.verificationDocs || '{}')
+    : backendUser.verificationDocs || {};
+  
+  const searchHistory = typeof backendUser.searchHistory === 'string'
+    ? JSON.parse(backendUser.searchHistory || '[]')
+    : backendUser.searchHistory || [];
+  
+  return {
+    id: backendUser.id.toString(),
+    name: backendUser.name,
+    email: backendUser.email,
+    phone: backendUser.phone || '',
+    address: backendUser.address || '',
+    tier: backendUser.tier || 'Gold',
+    role: backendUser.role,
+    status: backendUser.status,
+    verificationStatus: backendUser.verificationStatus,
+    verificationDocs,
+    walletBalance: backendUser.walletBalance || 0,
+    suspensionReason: backendUser.suspensionReason,
+    adminNotes: backendUser.adminNotes,
+    joined: new Date(backendUser.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    lastActive: backendUser.lastActive ? new Date(backendUser.lastActive).toLocaleDateString() : 'Just now',
+    avgSpend: '$0', // TODO: Calculate from orders
+    rentalHistoryCount: 0, // TODO: Count from orders
+    searchHistory,
+    location: backendUser.location || 'New York, USA',
+  };
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -251,8 +285,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('stylus_transactions', JSON.stringify(transactions));
   }, [transactions]);
 
-  const login = (emailOrName: string, password?: string) => {
-    // 1. Check for SPECIAL Credentials logic as requested
+  const login = async (emailOrName: string, password?: string) => {
+    // 1. Check for SPECIAL Credentials logic as requested (demo mode)
     if (emailOrName === 'Stylus') {
       if (password === 'Sty!usAdm1n#29XQ') {
         const adminUser = registeredUsers.find(u => u.role === 'Admin') || MOCK_USERS_DB[2];
@@ -268,11 +302,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    const foundUser = registeredUsers.find(u => u.email === emailOrName || u.name === emailOrName);
-    if (foundUser) {
-        return performLogin(foundUser);
+    // Call backend API for real authentication
+    if (!password) return false;
+    
+    try {
+      const response = await authAPI.login({ email: emailOrName, password });
+      const { user, token } = response;
+      
+      // Store token
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('stylus_auth', 'true');
+      localStorage.setItem('stylus_user_id', user.id.toString());
+      
+      // Convert backend user to RegisteredUser format
+      const mappedUser = mapBackendUserToRegisteredUser(user);
+      setIsAuthenticated(true);
+      setCurrentUser(mappedUser);
+      setIsAdmin(user.role === 'Admin');
+      
+      return true;
+    } catch (error) {
+      console.error('Login failed:', error);
+      return false;
     }
-    return false;
   };
 
   const performLogin = (user: RegisteredUser) => {
@@ -284,30 +336,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return true;
   };
 
-  const registerUser = (name: string, email: string, role: Role = 'User') => {
-    const newUser: RegisteredUser = {
-      id: Date.now().toString(),
-      name,
-      email,
-      phone: '',
-      address: '',
-      tier: 'Gold',
-      role,
-      status: 'Active',
-      verificationStatus: 'Unverified',
-      joined: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      lastActive: 'Just now',
-      avgSpend: '$0',
-      rentalHistoryCount: 0,
-      walletBalance: role === 'Partner' ? 0 : 500, // Sign up bonus for demo
-      location: 'New York, USA',
-      searchHistory: []
-    };
-    
-    setRegisteredUsers(prev => {
-        const updated = [...prev, newUser];
-        return updated;
-    });
+  const registerUser = async (name: string, email: string, password: string, role: Role = 'User') => {
+    try {
+      const response = await authAPI.register({ name, email, password, role });
+      const { user, token } = response;
+      
+      // Store token
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('stylus_auth', 'true');
+      localStorage.setItem('stylus_user_id', user.id.toString());
+      
+      // Convert backend user to RegisteredUser format
+      const mappedUser = mapBackendUserToRegisteredUser(user);
+      setIsAuthenticated(true);
+      setCurrentUser(mappedUser);
+      setIsAdmin(user.role === 'Admin');
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    }
   };
 
   const updateUserStatus = (id: string, newStatus: 'Active' | 'Suspended', reason?: string) => {
