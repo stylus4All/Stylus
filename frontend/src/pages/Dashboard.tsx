@@ -9,6 +9,7 @@ import { Category, Product, VerificationStatus, OrderStatus } from '../types';
 import { Button } from '../components/Button';
 import { UserVerificationForm } from '../components/UserVerificationForm';
 import { PartnerVerificationForm } from '../components/PartnerVerificationForm';
+import { DashboardAlert, DashboardAlertType } from '../components/Alert/DashboardAlert';
 import { checkRentalThreshold } from '../services/geminiService';
 
 export const Dashboard: React.FC = () => {
@@ -21,6 +22,7 @@ export const Dashboard: React.FC = () => {
   const [currentView, setCurrentView] = useState('overview');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [verificationModal, setVerificationModal] = useState(false);
+  const [dashboardAlert, setDashboardAlert] = useState<{ type: DashboardAlertType; title: string; message: string } | null>(null);
   
   // Wallet Funding & Withdrawal State
   const [fundModal, setFundModal] = useState(false);
@@ -49,10 +51,22 @@ export const Dashboard: React.FC = () => {
   const pastOrders = userOrders.filter(o => !activeOrders.includes(o));
 
   // Handle Verification Submission
-  const handleVerificationSubmit = (data: any) => {
-      submitVerification(currentUser!.id, data);
-      setVerificationModal(false);
-      alert("Verification documents submitted successfully. Please wait for Admin approval.");
+  const handleVerificationSubmit = async (data: any) => {
+      try {
+        await submitVerification(currentUser!.id, data);
+        setVerificationModal(false);
+        setDashboardAlert({
+          type: 'success',
+          title: 'Verification Submitted',
+          message: 'Your verification documents have been submitted successfully. Our team will review them within 24-48 hours. You\'ll be notified once verified.'
+        });
+      } catch (error: any) {
+        setDashboardAlert({
+          type: 'error',
+          title: 'Submission Failed',
+          message: error.message || 'Failed to submit verification. Please try again.'
+        });
+      }
   };
 
   const performLogout = () => {
@@ -64,11 +78,19 @@ export const Dashboard: React.FC = () => {
       e.preventDefault();
       const amount = Number(withdrawAmount);
       if (isNaN(amount) || amount <= 0) {
-          alert("Invalid amount.");
+          setDashboardAlert({
+            type: 'warning',
+            title: 'Invalid Amount',
+            message: 'Please enter a valid withdrawal amount.'
+          });
           return;
       }
       if (amount > (currentUser?.walletBalance || 0)) {
-          alert("Insufficient funds.");
+          setDashboardAlert({
+            type: 'error',
+            title: 'Insufficient Funds',
+            message: `You only have $${currentUser?.walletBalance.toFixed(2)} available in your wallet.`
+          });
           return;
       }
       
@@ -76,26 +98,49 @@ export const Dashboard: React.FC = () => {
       requestWithdrawal(currentUser!.id, amount, details);
       setWithdrawModal(false);
       setWithdrawAmount('');
-      alert("Withdrawal request submitted for processing.");
+      setDashboardAlert({
+        type: 'info',
+        title: 'Withdrawal Requested',
+        message: `Your withdrawal request for $${amount} has been submitted. Funds will be processed within 2-3 business days.`
+      });
   };
 
-  const handleFundWallet = (e: React.FormEvent) => {
+  const handleFundWallet = async (e: React.FormEvent) => {
       e.preventDefault();
       const amount = Number(fundAmount);
       if (isNaN(amount) || amount <= 0) {
-          alert("Please enter a valid amount.");
+          setDashboardAlert({
+            type: 'warning',
+            title: 'Invalid Amount',
+            message: 'Please enter a valid amount to deposit.'
+          });
           return;
       }
       
       setIsProcessingPayment(true);
-      // Simulate API call to payment gateway
-      setTimeout(() => {
-          updateWallet(currentUser!.id, amount, 'Wallet Fund via Card');
+      try {
+          // Simulate payment gateway
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Update wallet via backend
+          await updateWallet(currentUser!.id, amount, 'Wallet Fund via Card');
+          
           setIsProcessingPayment(false);
           setFundModal(false);
           setFundAmount('');
-          alert(`Successfully added $${amount} to your Stylus Wallet.`);
-      }, 2000);
+          setDashboardAlert({
+            type: 'success',
+            title: 'Deposit Successful',
+            message: `$${amount} has been added to your Stylus Wallet. Your new balance is $${(currentUser!.walletBalance + amount).toFixed(2)}.`
+          });
+      } catch (error: any) {
+          setIsProcessingPayment(false);
+          setDashboardAlert({
+            type: 'error',
+            title: 'Deposit Failed',
+            message: error.message || 'Failed to fund wallet. Please try again.'
+          });
+      }
   };
 
   // Partner Action: Accept specific Item
@@ -217,6 +262,16 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-espresso pb-20 animate-fade-in">
       
+      {/* Dashboard Alert */}
+      {dashboardAlert && (
+        <DashboardAlert
+          type={dashboardAlert.type}
+          title={dashboardAlert.title}
+          message={dashboardAlert.message}
+          onClose={() => setDashboardAlert(null)}
+        />
+      )}
+      
       {/* Verification Modal */}
       {verificationModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4">
@@ -320,7 +375,7 @@ export const Dashboard: React.FC = () => {
                       </div>
 
                       <div className="border-t border-white/10 pt-4 mt-4">
-                          <label className="text-xs text-cream/50 mb-3 block uppercase flex items-center gap-2"><CreditCard size={14}/> Card Details</label>
+                          <label className="text-xs text-cream/50 mb-3 uppercase flex items-center gap-2"><CreditCard size={14}/> Card Details</label>
                           <div className="space-y-3">
                               <input required type="text" placeholder="Card Number (0000 0000 0000 0000)" className="w-full bg-black/20 border border-white/10 p-3 text-cream text-sm focus:border-golden-orange outline-none rounded-sm" />
                               <div className="grid grid-cols-2 gap-3">

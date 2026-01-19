@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Diamond, ArrowRight, Globe, Eye, EyeOff, Briefcase, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/Button';
+import { LoginAlerts, AlertType } from '../components/Alert/LoginAlerts';
 import { Role } from '../types';
 
 export const Login: React.FC = () => {
@@ -19,6 +19,7 @@ export const Login: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [alert, setAlert] = useState<{ type: AlertType; message: string } | null>(null);
   const { login, registerUser } = useAuth();
   const navigate = useNavigate();
 
@@ -30,54 +31,109 @@ export const Login: React.FC = () => {
     }
   }, [location.state]);
 
-  const handleAuth = (e: React.FormEvent) => {
+  const validatePassword = (password: string): { isValid: boolean; message: string } => {
+    if (password.length < 8) {
+      return { isValid: false, message: 'Password must be at least 8 characters long' };
+    }
+    if (!/[A-Z]/.test(password)) {
+      return { isValid: false, message: 'Password must contain at least one uppercase letter' };
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      return { isValid: false, message: 'Password must contain at least one special character' };
+    }
+    return { isValid: true, message: '' };
+  };
+
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email || !password) return;
 
     // Validation for Signup
-    if (!isLoginMode && password !== confirmPassword) {
-        alert("Passwords do not match. Please try again.");
+    if (!isLoginMode) {
+      // Validate password strength
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.isValid) {
+        setAlert({ type: 'warning', message: passwordValidation.message });
         return;
+      }
+      
+      if (password !== confirmPassword) {
+        setAlert({ type: 'warning', message: "Passwords do not match. Please try again." });
+        return;
+      }
     }
 
     setIsLoading(true);
     
-    setTimeout(() => {
+    try {
       if (!isLoginMode) {
         // Register flow
-        registerUser(fullName, email, selectedRole);
-        // Then login
-        login(fullName); // Simplified for demo
+        await registerUser(fullName, email, password, selectedRole);
+        setAlert({ 
+          type: 'success', 
+          message: `Welcome to Stylus, ${fullName}! Your account has been created successfully. You can now access your dashboard.` 
+        });
+        // User is now logged in automatically after registration
+        setTimeout(() => {
+          setIsLoading(false);
+          navigate(from, { replace: true });
+        }, 2000);
       } else {
         // Login flow
-        const success = login(email, password);
+        const success = await login(email, password);
         if (!success) {
-            alert("Invalid credentials. For default accounts use username 'Stylus'.");
+            setAlert({ 
+              type: 'error', 
+              message: "Invalid email or password. Please check your credentials and try again. For demo accounts, use username 'Stylus'." 
+            });
             setIsLoading(false);
             return;
         }
+        setIsLoading(false);
+        navigate(from, { replace: true });
       }
-      
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      setAlert({ 
+        type: 'error', 
+        message: error.message || 'Authentication failed. Please check your details and try again.' 
+      });
       setIsLoading(false);
-      navigate(from, { replace: true });
-    }, 1500);
+    }
   };
 
-  const handleSocialLogin = (provider: 'Google' | 'Apple') => {
+  const handleSocialLogin = async (provider: 'Google' | 'Apple') => {
       // Mock social login always as User for simplicity
       const mockName = provider === 'Google' ? 'Alex Mercer' : 'Jordan Lee';
       const mockEmail = provider === 'Google' ? 'alex.m@gmail.com' : 'jordan.l@icloud.com';
+      const mockPassword = 'SocialLogin123!'; // Mock password for social logins
       
       setIsLoading(true);
-      setTimeout(() => {
+      try {
           if (!isLoginMode) {
-             registerUser(mockName, mockEmail, 'User');
+             await registerUser(mockName, mockEmail, mockPassword, 'User');
+             setAlert({ 
+               type: 'success', 
+               message: `Welcome! Your account has been created successfully with ${provider}.` 
+             });
+             setTimeout(() => {
+               setIsLoading(false);
+               navigate(from, { replace: true });
+             }, 2000);
+          } else {
+             await login(mockEmail, mockPassword);
+             setIsLoading(false);
+             navigate(from, { replace: true });
           }
-          login(mockName);
+      } catch (error: any) {
+          console.error('Social login error:', error);
+          setAlert({ 
+            type: 'error', 
+            message: error.message || `${provider} authentication failed. Please try again.` 
+          });
           setIsLoading(false);
-          navigate(from, { replace: true });
-      }, 1000);
+      }
   };
 
   const toggleMode = () => {
@@ -90,6 +146,15 @@ export const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-espresso flex items-center justify-center relative overflow-hidden animate-fade-in">
+      {/* Alert Popup */}
+      {alert && (
+        <LoginAlerts
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert(null)}
+        />
+      )}
+      
       <div className="absolute inset-0 z-0">
         <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-golden-orange/5 rounded-full blur-[120px]"></div>
         <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-golden-light/5 rounded-full blur-[120px]"></div>
