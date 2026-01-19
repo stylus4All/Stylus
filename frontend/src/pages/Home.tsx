@@ -6,17 +6,19 @@ import { useCart } from '../context/CartContext';
 import { useProduct } from '../context/ProductContext';
 import { Product } from '../types';
 
+
+
+
 export const Home: React.FC = () => {
   const { products } = useProduct();
   const { addToCart } = useCart();
 
   // --- Hero Slider Logic ---
   const heroImages = [
-    "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=1000&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?q=80&w=1000&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?q=80&w=1000&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1583623025817-d180a2221d0a?q=80&w=1000&auto=format&fit=crop"
+   "/Beaded.jpeg",
+   "/Pearl.jpeg",
+   "/Asoke.jpeg",
+   "/Red_suit.jpeg",
   ];
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -118,7 +120,7 @@ export const Home: React.FC = () => {
                   <div className="relative w-full max-w-md aspect-square bg-gradient-to-tr from-golden-orange to-espresso rounded-full p-1 animate-pulse-slow">
                      <div className="w-full h-full bg-[#1a0a04] rounded-full flex items-center justify-center relative overflow-hidden">
                         <Sparkles size={120} className="text-golden-orange animate-spin-slow opacity-80" />
-                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80')] opacity-20 bg-cover mix-blend-overlay"></div>
+                        <div className="absolute inset-0 bg-[url('/Meta.jpeg')] opacity-20 bg-cover mix-blend-overlay"></div>
                      </div>
                   </div>
                </div>
