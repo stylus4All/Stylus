@@ -35,11 +35,10 @@ export const Home: React.FC = () => {
   ];
 
   const team = [
-    { name: "Augustine Achi", role: "Founder & CEO", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop" },
-    { name: "Augustine Nwodo", role: "Head Curator", img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600&auto=format&fit=crop" },
-    { name: "Francis Okonkwo", role: "Project Manager", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=600&auto=format&fit=crop" },
-    { name: "Augustine Odezulu", role: "Software developer", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=600&auto=format&fit=crop" },
-    { name: "Karen Amarachi", role: "Software developer", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=600&auto=format&fit=crop" },
+    { name: "Augustine Achi", role: "Founder & CEO", img: "/clothe1.jpg" },
+    { name: "Augustine Nwodo", role: "Head Curator", img: "/clothe1.jpg" },
+    { name: "Francis Okonkwo", role: "Project Manager", img: "/clothe1.jpg" },
+    { name: "Augustine Odezulu", role: "Software developer", img: "/clothe1.jpg" },
   ];
 
   const quickAddToCart = (product: Product) => {
