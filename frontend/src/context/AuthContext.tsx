@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Role, VerificationStatus, Transaction } from '../types';
+import { authAPI, userAPI } from '../services/api';
 
 // Extended User Interface
 export interface RegisteredUser {
@@ -39,16 +40,16 @@ interface AuthContextType {
   currentUser: RegisteredUser | null;
   registeredUsers: RegisteredUser[];
   transactions: Transaction[];
-  login: (email: string, password?: string) => boolean;
+  login: (email: string, password?: string) => Promise<boolean>;
   logout: () => void;
-  registerUser: (name: string, email: string, role?: Role) => void;
+  registerUser: (name: string, email: string, password: string, role?: Role) => Promise<void>;
   updateUserStatus: (id: string, newStatus: 'Active' | 'Suspended', reason?: string) => void;
   updateUserRole: (id: string, newRole: Role) => void;
   updateUserNotes: (id: string, notes: string) => void;
-  submitVerification: (id: string, docs: Partial<RegisteredUser['verificationDocs']>) => void;
+  submitVerification: (id: string, docs: Partial<RegisteredUser['verificationDocs']>) => Promise<void>;
   approveVerification: (id: string) => void;
   rejectVerification: (id: string, reason: string) => void;
-  updateWallet: (id: string, amount: number, description: string, type?: Transaction['type']) => void;
+  updateWallet: (id: string, amount: number, description: string, type?: Transaction['type']) => Promise<void>;
   transferFunds: (fromId: string, toId: string, amount: number, description: string) => void;
   requestWithdrawal: (id: string, amount: number, bankDetails: string) => void;
   processWithdrawal: (transactionId: string) => void;
@@ -62,16 +63,16 @@ const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   registeredUsers: [],
   transactions: [],
-  login: () => false,
+  login: async () => false,
   logout: () => {},
-  registerUser: () => {},
+  registerUser: async () => {},
   updateUserStatus: () => {},
   updateUserRole: () => {},
   updateUserNotes: () => {},
-  submitVerification: () => {},
+  submitVerification: async () => {},
   approveVerification: () => {},
   rejectVerification: () => {},
-  updateWallet: () => {},
+  updateWallet: async () => {},
   transferFunds: () => {},
   requestWithdrawal: () => {},
   processWithdrawal: () => {},
@@ -176,6 +177,39 @@ const MOCK_TRANSACTIONS: Transaction[] = [
     { id: 'tx-3', userId: '4', userName: 'Victoria Sterling', type: 'Credit', amount: 1500, description: 'Wallet Deposit', date: 'Feb 15, 2024', status: 'Completed', paymentMethod: 'Card ending 8811' },
 ];
 
+// Helper function to map backend user to frontend RegisteredUser format
+const mapBackendUserToRegisteredUser = (backendUser: any): RegisteredUser => {
+  const verificationDocs = typeof backendUser.verificationDocs === 'string' 
+    ? JSON.parse(backendUser.verificationDocs || '{}')
+    : backendUser.verificationDocs || {};
+  
+  const searchHistory = typeof backendUser.searchHistory === 'string'
+    ? JSON.parse(backendUser.searchHistory || '[]')
+    : backendUser.searchHistory || [];
+  
+  return {
+    id: backendUser.id.toString(),
+    name: backendUser.name,
+    email: backendUser.email,
+    phone: backendUser.phone || '',
+    address: backendUser.address || '',
+    tier: backendUser.tier || 'Gold',
+    role: backendUser.role,
+    status: backendUser.status,
+    verificationStatus: backendUser.verificationStatus,
+    verificationDocs,
+    walletBalance: backendUser.walletBalance || 0,
+    suspensionReason: backendUser.suspensionReason,
+    adminNotes: backendUser.adminNotes,
+    joined: new Date(backendUser.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    lastActive: backendUser.lastActive ? new Date(backendUser.lastActive).toLocaleDateString() : 'Just now',
+    avgSpend: '$0', // TODO: Calculate from orders
+    rentalHistoryCount: 0, // TODO: Count from orders
+    searchHistory,
+    location: backendUser.location || 'New York, USA',
+  };
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -251,8 +285,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('stylus_transactions', JSON.stringify(transactions));
   }, [transactions]);
 
-  const login = (emailOrName: string, password?: string) => {
-    // 1. Check for SPECIAL Credentials logic as requested
+  const login = async (emailOrName: string, password?: string) => {
+    // 1. Check for SPECIAL Credentials logic as requested (demo mode)
     if (emailOrName === 'Stylus') {
       if (password === 'Sty!usAdm1n#29XQ') {
         const adminUser = registeredUsers.find(u => u.role === 'Admin') || MOCK_USERS_DB[2];
@@ -268,11 +302,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    const foundUser = registeredUsers.find(u => u.email === emailOrName || u.name === emailOrName);
-    if (foundUser) {
-        return performLogin(foundUser);
+    // Call backend API for real authentication
+    if (!password) return false;
+    
+    try {
+      const response = await authAPI.login({ email: emailOrName, password });
+      const { user, token } = response;
+      
+      // Store token
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('stylus_auth', 'true');
+      localStorage.setItem('stylus_user_id', user.id.toString());
+      
+      // Convert backend user to RegisteredUser format
+      const mappedUser = mapBackendUserToRegisteredUser(user);
+      setIsAuthenticated(true);
+      setCurrentUser(mappedUser);
+      setIsAdmin(user.role === 'Admin');
+      
+      return true;
+    } catch (error) {
+      console.error('Login failed:', error);
+      return false;
     }
-    return false;
   };
 
   const performLogin = (user: RegisteredUser) => {
@@ -284,30 +336,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return true;
   };
 
-  const registerUser = (name: string, email: string, role: Role = 'User') => {
-    const newUser: RegisteredUser = {
-      id: Date.now().toString(),
-      name,
-      email,
-      phone: '',
-      address: '',
-      tier: 'Gold',
-      role,
-      status: 'Active',
-      verificationStatus: 'Unverified',
-      joined: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      lastActive: 'Just now',
-      avgSpend: '$0',
-      rentalHistoryCount: 0,
-      walletBalance: role === 'Partner' ? 0 : 500, // Sign up bonus for demo
-      location: 'New York, USA',
-      searchHistory: []
-    };
-    
-    setRegisteredUsers(prev => {
-        const updated = [...prev, newUser];
-        return updated;
-    });
+  const registerUser = async (name: string, email: string, password: string, role: Role = 'User') => {
+    try {
+      const response = await authAPI.register({ name, email, password, role });
+      const { user, token } = response;
+      
+      // Store token
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('stylus_auth', 'true');
+      localStorage.setItem('stylus_user_id', user.id.toString());
+      
+      // Convert backend user to RegisteredUser format
+      const mappedUser = mapBackendUserToRegisteredUser(user);
+      setIsAuthenticated(true);
+      setCurrentUser(mappedUser);
+      setIsAdmin(user.role === 'Admin');
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    }
   };
 
   const updateUserStatus = (id: string, newStatus: 'Active' | 'Suspended', reason?: string) => {
@@ -331,30 +378,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRegisteredUsers(prev => prev.map(u => u.id === id ? { ...u, adminNotes: notes } : u));
   };
 
-  const submitVerification = (id: string, docs: Partial<RegisteredUser['verificationDocs']>) => {
-    const updatedUsers = registeredUsers.map(u => 
-       u.id === id ? { ...u, verificationStatus: 'Pending' as VerificationStatus, verificationDocs: { ...u.verificationDocs, ...docs } } : u
-    );
-    setRegisteredUsers(updatedUsers);
-    
-    // If it's a partner, log the registration fee transaction
-    const user = registeredUsers.find(u => u.id === id);
-    if (user && user.role === 'Partner') {
-        const feeTx: Transaction = {
-            id: `tx-fee-${Date.now()}`,
-            userId: id,
-            userName: user.name,
-            type: 'Fee',
-            amount: 20000,
-            description: 'One-Time Partnership Verification Fee',
-            date: new Date().toLocaleDateString(),
-            status: 'Completed',
-            paymentMethod: 'Card ending ****' // Simulated
-        };
-        setTransactions(prev => [feeTx, ...prev]);
+  const submitVerification = async (id: string, docs: Partial<RegisteredUser['verificationDocs']>) => {
+    try {
+      // Call backend API
+      const response = await userAPI.submitVerification(parseInt(id), docs);
+      const updatedUser = mapBackendUserToRegisteredUser(response);
+      
+      // Update local state
+      const updatedUsers = registeredUsers.map(u => 
+         u.id === id ? updatedUser : u
+      );
+      setRegisteredUsers(updatedUsers);
+      
+      // Update current user if it's the same
+      if (currentUser?.id === id) setCurrentUser(updatedUser);
+      
+      // If it's a partner, log the registration fee transaction (simulate for demo)
+      if (updatedUser.role === 'Partner') {
+          const feeTx: Transaction = {
+              id: `tx-fee-${Date.now()}`,
+              userId: id,
+              userName: updatedUser.name,
+              type: 'Fee',
+              amount: 20000,
+              description: 'One-Time Partnership Verification Fee',
+              date: new Date().toLocaleDateString(),
+              status: 'Completed',
+              paymentMethod: 'Card ending ****'
+          };
+          setTransactions(prev => [feeTx, ...prev]);
+      }
+    } catch (error) {
+      console.error('Verification submission failed:', error);
+      throw error;
     }
-
-    if (currentUser?.id === id) setCurrentUser(updatedUsers.find(u => u.id === id) || null);
   };
 
   const approveVerification = (id: string) => {
@@ -370,26 +427,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (currentUser?.id === id) setCurrentUser(updatedUsers.find(u => u.id === id) || null);
   };
 
-  const updateWallet = (id: string, amount: number, description: string, type: Transaction['type'] = amount > 0 ? 'Credit' : 'Debit') => {
-    const updatedUsers = registeredUsers.map(u => u.id === id ? { ...u, walletBalance: u.walletBalance + amount } : u);
-    setRegisteredUsers(updatedUsers);
-    
-    // Log Transaction
-    const user = registeredUsers.find(u => u.id === id);
-    const newTx: Transaction = {
-        id: `tx-${Date.now()}`,
-        userId: id,
-        userName: user?.name || 'Unknown',
-        type: type,
-        amount: Math.abs(amount),
-        description: description,
-        date: new Date().toLocaleDateString(),
-        status: 'Completed',
-        paymentMethod: 'Wallet'
-    };
-    setTransactions(prev => [newTx, ...prev]);
+  const updateWallet = async (id: string, amount: number, description: string, type: Transaction['type'] = amount > 0 ? 'Credit' : 'Debit') => {
+    try {
+      // Call backend API
+      const response = await userAPI.updateWallet(parseInt(id), amount);
+      const updatedUser = mapBackendUserToRegisteredUser(response);
+      
+      // Update local state
+      const updatedUsers = registeredUsers.map(u => u.id === id ? updatedUser : u);
+      setRegisteredUsers(updatedUsers);
+      
+      // Create transaction record (could be moved to backend)
+      const newTx: Transaction = {
+          id: `tx-${Date.now()}`,
+          userId: id,
+          userName: updatedUser.name,
+          type: type,
+          amount: Math.abs(amount),
+          description: description,
+          date: new Date().toLocaleDateString(),
+          status: 'Completed',
+          paymentMethod: 'Wallet'
+      };
+      setTransactions(prev => [newTx, ...prev]);
 
-    if (currentUser?.id === id) setCurrentUser(updatedUsers.find(u => u.id === id) || null);
+      if (currentUser?.id === id) setCurrentUser(updatedUser);
+    } catch (error) {
+      console.error('Wallet update failed:', error);
+      throw error;
+    }
   };
   
   const transferFunds = (fromId: string, toId: string, amount: number, description: string) => {

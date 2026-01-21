@@ -6,8 +6,13 @@ async function apiCall(endpoint: string, options: RequestInit = {}) {
   const base = API_BASE_URL.replace(/\/$/, '');
   const path = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
   const url = `${base}${path}`;
+  
+  // Get token from localStorage if available
+  const token = localStorage.getItem('authToken');
+  
   const headers = {
     'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     ...options.headers,
   };
 
@@ -20,6 +25,29 @@ async function apiCall(endpoint: string, options: RequestInit = {}) {
 
   return response.json();
 }
+
+// Auth APIs
+export const authAPI = {
+  register: (data: {
+    email: string;
+    password: string;
+    name: string;
+    phone?: string;
+    address?: string;
+    role?: 'User' | 'Partner' | 'Admin';
+    location?: string;
+  }) => apiCall('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+  
+  login: (data: { email: string; password: string }) =>
+    apiCall('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+  
+  getCurrentUser: () => apiCall('/auth/me'),
+  
+  changePassword: (data: { oldPassword: string; newPassword: string }) =>
+    apiCall('/auth/change-password', { method: 'POST', body: JSON.stringify(data) }),
+  
+  logout: () => apiCall('/auth/logout', { method: 'POST' }),
+};
 
 // User APIs
 export const userAPI = {

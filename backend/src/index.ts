@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { prisma } from './prisma';
+import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import productRoutes from './routes/products';
 import orderRoutes from './routes/orders';
@@ -24,6 +25,7 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 // API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
@@ -38,6 +40,7 @@ app.get('/', (_req: Request, res: Response) => {
     message: 'Stylus Backend API',
     version: '1.0.0',
     endpoints: {
+      auth: '/api/auth',
       users: '/api/users',
       products: '/api/products',
       orders: '/api/orders',
