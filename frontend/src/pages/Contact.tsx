@@ -8,7 +8,7 @@ export const Contact: React.FC = () => {
        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
            <div className="text-center mb-16">
               <span className="text-golden-orange uppercase tracking-[0.2em] text-xs">Get in Touch</span>
-              <h1 className="font-serif text-4xl md:text-5xl text-cream mt-4">Contact Concierge</h1>
+              <h1 className="font-serif text-4xl md:text-5xl text-cream mt-4">Contact Stylus</h1>
            </div>
 
            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
@@ -63,13 +63,13 @@ export const Contact: React.FC = () => {
                            </div>
                            <div className="flex items-center gap-4 text-cream/80">
                                <Mail className="text-golden-orange shrink-0" />
-                               <p>concierge@stylus.com</p>
+                               <p>Stylus@gmail.com</p>
                            </div>
                        </div>
                    </div>
 
                    <div className="p-8 bg-white/5 border border-golden-orange/20">
-                       <p className="font-serif text-xl text-golden-orange mb-2">Concierge Hours</p>
+                       <p className="font-serif text-xl text-golden-orange mb-2">Stylus Hours</p>
                        <p className="text-cream/60 text-sm">Mon - Fri: 8am - 8pm EST<br/>Sat - Sun: 10am - 6pm EST</p>
                    </div>
                </div>

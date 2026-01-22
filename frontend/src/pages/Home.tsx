@@ -41,7 +41,7 @@ export const Home: React.FC = () => {
     { name: "Augustine Nwodo", role: "Head Curator", img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600&auto=format&fit=crop" },
     { name: "Francis Okonkwo", role: "Project Manager", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=600&auto=format&fit=crop" },
     { name: "Augustine Odezulu", role: "Software developer", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=600&auto=format&fit=crop" },
-    { name: "Karen Amarachi", role: "Software developer", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=600&auto=format&fit=crop" },
+    { name: "Karen Ekeji", role: "Software developer", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=600&auto=format&fit=crop" },
   ];
 
   const quickAddToCart = (product: Product) => {
@@ -197,7 +197,7 @@ export const Home: React.FC = () => {
                             <p className="text-golden-orange text-xs uppercase tracking-wide font-bold">{product.brand}</p>
                             <h3 className="font-serif text-xl text-espresso">{product.name}</h3>
                          </div>
-                         <p className="font-serif text-lg text-espresso/80">${product.rentalPrice}</p>
+                         <p className="font-serif text-lg text-espresso/80">₦{product.rentalPrice}</p>
                       </div>
                    </div>
                 </div>

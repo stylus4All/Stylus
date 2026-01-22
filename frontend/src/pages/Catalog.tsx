@@ -85,7 +85,7 @@ export const Catalog: React.FC = () => {
       color: 'All',
       size: 'All',
       occasion: 'All',
-      maxPrice: 5000,
+      maxPrice: 7500000,
       sortBy: 'newest'
     });
   };
@@ -139,7 +139,7 @@ export const Catalog: React.FC = () => {
                             {/* Dots */}
                             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                                 {quickViewProduct.images.map((_, idx) => (
-                                    <div key={idx} className={`w-1.5 h-1.5 rounded-full transition-all ${quickViewIndex === idx ? 'bg-golden-orange scale-125' : 'bg-white/50'}`} />
+                                    <div key={idx} className={`w-1.5 h-1.5 rounded-full transition-all ₦{quickViewIndex === idx ? 'bg-golden-orange scale-125' : 'bg-white/50'}`} />
                                 ))}
                             </div>
                         </>
@@ -153,23 +153,23 @@ export const Catalog: React.FC = () => {
                     <div className="flex flex-col gap-6 mb-8 border-t border-white/10 pt-6">
                         <div className="flex justify-between items-end">
                             <div>
-                                <p className="font-serif text-3xl text-cream animate-pulse">${quickViewProduct.rentalPrice}</p>
+                                <p className="font-serif text-3xl text-cream animate-pulse">₦{quickViewProduct.rentalPrice}</p>
                                 <p className="text-xs text-cream/40 uppercase tracking-wide">Rental / 4 Days</p>
                             </div>
                             {quickViewProduct.isForSale && (
                                 <div className="text-right">
-                                    <p className="font-serif text-3xl text-golden-orange">${quickViewProduct.buyPrice}</p>
+                                    <p className="font-serif text-3xl text-golden-orange">₦{quickViewProduct.buyPrice}</p>
                                     <p className="text-xs text-cream/40 uppercase tracking-wide">Buy Price</p>
                                 </div>
                             )}
                         </div>
                         
                         <div className="flex flex-col sm:flex-row gap-4">
-                            <Link to={`/product/${quickViewProduct.id}`} className="flex-1">
+                            <Link to={`/product/₦{quickViewProduct.id}`} className="flex-1">
                                 <Button fullWidth>Rent Now</Button>
                             </Link>
                             {quickViewProduct.isForSale && (
-                                <Link to={`/product/${quickViewProduct.id}`} className="flex-1">
+                                <Link to={`/product/₦{quickViewProduct.id}`} className="flex-1">
                                     <Button fullWidth variant="secondary">Buy Now</Button>
                                 </Link>
                             )}
@@ -285,7 +285,7 @@ export const Catalog: React.FC = () => {
                 <div className="w-full">
                    <div className="flex justify-between mb-2">
                        <label className="text-[10px] text-cream/50 uppercase tracking-widest font-bold">Max Price</label>
-                       <span className="text-xs text-golden-orange font-bold">${filters.maxPrice}</span>
+                       <span className="text-xs text-golden-orange font-bold">₦{filters.maxPrice}</span>
                    </div>
                    <input 
                         type="range" min="50" max="5000" step="50"
@@ -395,7 +395,7 @@ const ProductCard: React.FC<{ product: Product; onQuickView: (p: Product) => voi
         </div>
       </div>
       <div className="flex items-baseline justify-between mt-2 pt-3 border-t border-white/5 px-1">
-        <span className="text-cream font-medium font-serif text-lg">${product.rentalPrice} <span className="text-xs text-cream/50 font-sans font-light">/ 4 days</span></span>
+        <span className="text-cream font-medium font-serif text-lg">₦{product.rentalPrice} <span className="text-xs text-cream/50 font-sans font-light">/ 4 days</span></span>
         {product.rentalCount && product.rentalCount >= 5 && <span className="text-[10px] text-red-400 border border-red-500/50 px-2 py-0.5 rounded uppercase font-bold">Sell Only</span>}
       </div>
     </div>

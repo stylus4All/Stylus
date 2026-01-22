@@ -185,7 +185,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <h4 className="text-golden-orange text-xs uppercase tracking-widest font-bold mb-6">Discover</h4>
               <ul className="space-y-4 text-sm text-cream/70">
                 <li><Link to="/catalog" className="hover:text-golden-orange transition-colors">The Collection</Link></li>
-                <li><Link to="/ai-stylist" className="hover:text-golden-orange transition-colors">AI Concierge</Link></li>
+                <li><Link to="/ai-stylist" className="hover:text-golden-orange transition-colors">AI Stylus</Link></li>
                 <li><Link to="/the-edit" className="hover:text-golden-orange transition-colors">The Edit</Link></li>
                 <li><Link to="/about" className="hover:text-golden-orange transition-colors">Our Story</Link></li>
               </ul>
@@ -208,7 +208,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <ul className="space-y-4 text-sm text-cream/70">
                 <li className="flex items-center gap-2"><MapPin size={16} className="text-golden-orange"/> 125 5th Ave, NYC</li>
                 <li className="flex items-center gap-2"><Phone size={16} className="text-golden-orange"/> +1 (888) STYLUS-VIP</li>
-                <li className="flex items-center gap-2"><Mail size={16} className="text-golden-orange"/> concierge@stylus.com</li>
+                <li className="flex items-center gap-2"><Mail size={16} className="text-golden-orange"/> Stylus@gmail.com</li>
               </ul>
             </div>
           </div>

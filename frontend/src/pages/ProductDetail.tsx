@@ -344,14 +344,14 @@ export const ProductDetail: React.FC = () => {
                              <div className="absolute top-0 right-0 w-16 h-16 bg-golden-orange/10 rounded-bl-full"></div>
                              <p className="text-xs text-cream/50 uppercase tracking-widest mb-1">Rent from</p>
                              <div className="flex items-baseline gap-1">
-                                <p className="text-3xl font-serif text-cream">${product.rentalPrice}</p>
+                                <p className="text-3xl font-serif text-cream">₦{product.rentalPrice}</p>
                                 <p className="text-sm text-cream/50">/ 4 Days</p>
                              </div>
                              {!isRentable && <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-xs uppercase font-bold text-red-500">Sell Only</div>}
                          </div>
                          {(product.isForSale || !isRentable) && (
                              <div>
-                                 <p className="text-3xl font-serif text-golden-orange">${product.buyPrice}</p>
+                                 <p className="text-3xl font-serif text-golden-orange">₦{product.buyPrice}</p>
                                  <p className="text-xs text-cream/50 uppercase tracking-widest mt-1">Buy Price</p>
                              </div>
                          )}
