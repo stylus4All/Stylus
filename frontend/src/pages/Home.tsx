@@ -37,11 +37,10 @@ export const Home: React.FC = () => {
   ];
 
   const team = [
-    { name: "Augustine Achi", role: "Founder & CEO", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop" },
-    { name: "Augustine Nwodo", role: "Head Curator", img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600&auto=format&fit=crop" },
-    { name: "Francis Okonkwo", role: "Project Manager", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=600&auto=format&fit=crop" },
-    { name: "Augustine Odezulu", role: "Software developer", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=600&auto=format&fit=crop" },
-    { name: "Karen Ekeji", role: "Software developer", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=600&auto=format&fit=crop" },
+    { name: "Augustine Achi", role: "Founder & CEO", img: "/Austin.jpeg" },
+    { name: "Augustine Nwodo", role: "Chief Marketing Manager", img: "/Austin_Nwodo.jpeg" },
+    { name: "Francis Okonkwo", role: "Chief Project Manager", img: "/Francis1.jpeg" },
+    { name: "Augustine Odezulu", role: "Chief Developing Manager", img: "/Austin_Odezulu.jpeg" },
   ];
 
   const quickAddToCart = (product: Product) => {
@@ -149,7 +148,7 @@ export const Home: React.FC = () => {
             <div className="p-8 border border-white/5 hover:border-golden-orange/30 transition-all duration-300 bg-white/[0.02] text-center group">
               <DollarSign className="h-10 w-10 text-golden-orange mx-auto mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="font-serif text-xl text-cream mb-4">Quality Affordability</h3>
-              <p className="text-cream/60 text-sm">Access $5,000 gowns for a fraction of the retail price.</p>
+              <p className="text-cream/60 text-sm">Access ₦5,000 gowns for a fraction of the retail price.</p>
             </div>
             <div className="p-8 border border-white/5 hover:border-golden-orange/30 transition-all duration-300 bg-white/[0.02] text-center group">
                <Truck className="h-10 w-10 text-golden-orange mx-auto mb-6 group-hover:scale-110 transition-transform" />
@@ -234,23 +233,103 @@ export const Home: React.FC = () => {
       </section>
 
       {/* 6. OUR TEAM */}
-      <section className="py-24 bg-[#1a0a04]">
-         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
+      <section className="py-32 bg-[#1a0a04] relative overflow-hidden">
+         <div className="absolute top-20 left-0 w-[300px] h-[300px] bg-golden-orange/5 rounded-full blur-[100px]"></div>
+         <div className="absolute bottom-20 right-0 w-[300px] h-[300px] bg-golden-orange/5 rounded-full blur-[100px]"></div>
+         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="text-center mb-20">
                <span className="text-golden-orange uppercase tracking-widest text-xs font-bold">Behind the Seams</span>
-               <h2 className="font-serif text-4xl text-cream mt-2">Meet Our Team</h2>
+               <h2 className="font-serif text-4xl md:text-5xl text-cream mt-4">Meet Our Team</h2>
+               <p className="text-cream/60 mt-4 max-w-2xl mx-auto">Talented individuals dedicated to redefining fashion and bringing luxury to everyone.</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                {team.map((member, idx) => (
-                  <div key={idx} className="text-center group">
-                     <div className="w-48 h-48 mx-auto mb-6 rounded-full overflow-hidden border-2 border-golden-orange/20 group-hover:border-golden-orange transition-colors">
-                        <img src={member.img} alt={member.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                  <div 
+                     key={idx} 
+                     className="group relative animate-scale-in"
+                     style={{animationDelay: `${idx * 0.15}s`}}
+                  >
+                     <div className="absolute inset-0 bg-gradient-to-br from-golden-orange/10 to-golden-orange/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                     <div className="relative p-6 border border-golden-orange/20 bg-white/[0.02] rounded-xl hover:border-golden-orange/60 transition-all duration-300 hover:shadow-2xl hover:shadow-golden-orange/20 group-hover:translate-y-[-8px] h-full flex flex-col items-center text-center">
+                        {/* Image */}
+                        <div className="w-40 h-40 mx-auto mb-6 rounded-full overflow-hidden border-3 border-golden-orange/30 group-hover:border-golden-orange transition-all duration-500 relative">
+                           <img 
+                              src={member.img} 
+                              alt={member.name} 
+                              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110" 
+                           />
+                           <div className="absolute inset-0 bg-golden-orange/0 group-hover:bg-golden-orange/10 transition-colors duration-500"></div>
+                        </div>
+                        
+                        {/* Content */}
+                        <h3 className="font-serif text-xl text-cream mb-2 group-hover:text-golden-orange transition-colors">{member.name}</h3>
+                        <p className="text-golden-orange text-xs uppercase tracking-widest mb-4 font-semibold">{member.role}</p>
+                        
+                        {/* Divider */}
+                        <div className="w-8 h-px bg-golden-orange/30 mb-4"></div>
+                        
+                        {/* Description */}
+                        <p className="text-cream/60 text-sm mb-6 flex-grow">Bringing expertise and passion to every aspect of Stylus.</p>
+                        
+                        {/* Button */}
+                        <button className="w-full py-2 px-4 border border-golden-orange/30 text-golden-orange text-xs uppercase tracking-widest hover:bg-golden-orange/10 hover:border-golden-orange/60 transition-all duration-300">
+                           View Profile
+                        </button>
                      </div>
-                     <h3 className="font-serif text-2xl text-cream mb-1">{member.name}</h3>
-                     <p className="text-golden-orange text-sm uppercase tracking-widest mb-4">{member.role}</p>
-                     <button className="text-xs text-cream/40 uppercase tracking-widest hover:text-white transition-colors">View Portfolio</button>
                   </div>
                ))}
+            </div>
+         </div>
+      </section>
+
+      {/* 7. NEWSLETTER SECTION */}
+      <section className="py-24 bg-gradient-to-r from-espresso to-[#1f0c05] relative overflow-hidden border-t border-golden-orange/20">
+         <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-golden-orange/5 rounded-full blur-[120px]"></div>
+         <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-golden-orange/5 rounded-full blur-[120px]"></div>
+         
+         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="text-center mb-12 animate-slide-up">
+               <span className="text-golden-orange uppercase tracking-widest text-xs font-bold">Stay Connected</span>
+               <h2 className="font-serif text-4xl md:text-5xl text-cream mt-4 mb-6">Exclusive Luxury Updates</h2>
+               <p className="text-cream/70 text-lg leading-relaxed max-w-2xl mx-auto">
+                  Be the first to know about new arrivals, exclusive rentals, and special invitations to our VIP events. Subscribe to our newsletter for curated fashion moments delivered to your inbox.
+               </p>
+            </div>
+
+            <div className="bg-white/5 border border-golden-orange/20 rounded-xl p-8 md:p-12 backdrop-blur-sm hover:border-golden-orange/40 transition-all duration-300">
+               <form onSubmit={(e) => { e.preventDefault(); alert('Thank you for subscribing!'); (e.target as HTMLFormElement).reset(); }} className="flex flex-col sm:flex-row gap-4">
+                  <input 
+                     type="email" 
+                     placeholder="Enter your email address" 
+                     required
+                     className="flex-1 px-6 py-3 bg-espresso text-cream placeholder-cream/40 border border-golden-orange/20 focus:border-golden-orange focus:outline-none focus:ring-2 focus:ring-golden-orange/30 rounded-lg transition-all duration-300 text-sm md:text-base"
+                  />
+                  <button 
+                     type="submit"
+                     className="px-8 py-3 bg-golden-orange text-espresso font-bold uppercase tracking-wider rounded-lg hover:bg-golden-light hover:shadow-lg hover:shadow-golden-orange/40 transition-all duration-300 whitespace-nowrap text-sm md:text-base"
+                  >
+                     Subscribe
+                  </button>
+               </form>
+               
+               <p className="text-cream/50 text-xs mt-6 text-center">
+                  We respect your privacy. Unsubscribe at any time. <span className="text-golden-orange hover:underline cursor-pointer">View our Privacy Policy</span>
+               </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mt-16">
+               <div className="text-center">
+                  <div className="text-3xl text-golden-orange font-serif mb-3">✦</div>
+                  <p className="text-cream/70 text-sm">Weekly curated recommendations</p>
+               </div>
+               <div className="text-center">
+                  <div className="text-3xl text-golden-orange font-serif mb-3">✦</div>
+                  <p className="text-cream/70 text-sm">Exclusive member-only discounts</p>
+               </div>
+               <div className="text-center">
+                  <div className="text-3xl text-golden-orange font-serif mb-3">✦</div>
+                  <p className="text-cream/70 text-sm">Early access to limited drops</p>
+               </div>
             </div>
          </div>
       </section>

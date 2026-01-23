@@ -28,13 +28,13 @@ export const InfoPage: React.FC<InfoPageProps> = ({ type }) => {
     }
 
     if (currentUser.walletBalance < cartTotal) {
-        if(confirm(`Insufficient funds in your wallet ($${currentUser.walletBalance.toFixed(2)}). Total needed: $${cartTotal.toFixed(2)}.\n\nWould you like to go to your dashboard to fund your wallet?`)) {
+        if(confirm(`Insufficient funds in your wallet (₦${currentUser.walletBalance.toFixed(2)}). Total needed: ₦${cartTotal.toFixed(2)}.\n\nWould you like to go to your dashboard to fund your wallet?`)) {
             navigate('/dashboard');
         }
         return;
     }
 
-    if(confirm(`Confirm payment of $${cartTotal.toFixed(2)} from your wallet?`)) {
+    if(confirm(`Confirm payment of ₦${cartTotal.toFixed(2)} from your wallet?`)) {
         
         // Process Payments for each item
         cart.forEach(item => {
@@ -227,7 +227,7 @@ export const InfoPage: React.FC<InfoPageProps> = ({ type }) => {
         </div>
         <h1 className="font-serif text-5xl text-cream mb-12">{current.title}</h1>
         
-        <div className="text-left bg-[#1f0c05] p-10 border border-white/5 shadow-2xl rounded-sm flex flex-col items-center text-center">
+        <div className=" bg-[#1f0c05] p-10 border border-white/5 shadow-2xl rounded-sm flex flex-col items-center text-center">
           <div className="text-cream/80 leading-relaxed text-lg font-light w-full">
             {current.text}
           </div>
