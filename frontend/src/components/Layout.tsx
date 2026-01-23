@@ -70,6 +70,20 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                <Link to="/ai-stylist" className="text-cream hover:text-golden-orange transition-colors" title="AI Stylist">
                   <span className="text-[10px] uppercase border border-golden-orange px-2 py-1 rounded text-golden-orange hover:bg-golden-orange hover:text-espresso transition-colors">AI Stylist</span>
                </Link>
+              
+              {/* Social Media Links */}
+              <div className="flex items-center space-x-3 pl-3 border-l border-white/10">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-cream/70 hover:text-golden-orange transition-colors hover:scale-110 transform duration-300" title="Follow us on Instagram">
+                  <Instagram size={18} />
+                </a>
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-cream/70 hover:text-golden-orange transition-colors hover:scale-110 transform duration-300" title="Follow us on Twitter">
+                  <Twitter size={18} />
+                </a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-cream/70 hover:text-golden-orange transition-colors hover:scale-110 transform duration-300" title="Follow us on Facebook">
+                  <Facebook size={18} />
+                </a>
+              </div>
+
               <Link to="/bag" className="text-cream hover:text-golden-orange transition-colors relative" title="Shopping Bag">
                 <ShoppingBag size={20} />
                 {cartCount > 0 && (
@@ -125,6 +139,19 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Link to="/ai-stylist" onClick={closeMobileMenu} className="text-golden-orange font-serif text-lg border-b border-white/5 pb-2 flex items-center gap-2"><Diamond size={16}/> AI Concierge</Link>
               <Link to="/contact" onClick={closeMobileMenu} className="text-cream hover:text-golden-orange font-serif text-lg border-b border-white/5 pb-2">Contact</Link>
               
+              {/* Mobile Social Links */}
+              <div className="flex items-center gap-4 pt-4 border-t border-white/5">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-cream/70 hover:text-golden-orange transition-colors" title="Follow us on Instagram">
+                  <Instagram size={20} />
+                </a>
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-cream/70 hover:text-golden-orange transition-colors" title="Follow us on Twitter">
+                  <Twitter size={20} />
+                </a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-cream/70 hover:text-golden-orange transition-colors" title="Follow us on Facebook">
+                  <Facebook size={20} />
+                </a>
+              </div>
+              
               {isAuthenticated ? (
                 <>
                   {isAdmin ? (
@@ -174,9 +201,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 Redefining luxury through access, not ownership. Curated for the modern connoisseur.
               </p>
               <div className="flex space-x-4">
-                <a href="#" className="text-cream/60 hover:text-golden-orange transition-colors"><Instagram size={20} /></a>
-                <a href="#" className="text-cream/60 hover:text-golden-orange transition-colors"><Twitter size={20} /></a>
-                <a href="#" className="text-cream/60 hover:text-golden-orange transition-colors"><Facebook size={20} /></a>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-cream/60 hover:text-golden-orange transition-colors hover:scale-110 transform duration-300"><Instagram size={20} /></a>
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-cream/60 hover:text-golden-orange transition-colors hover:scale-110 transform duration-300"><Twitter size={20} /></a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-cream/60 hover:text-golden-orange transition-colors hover:scale-110 transform duration-300"><Facebook size={20} /></a>
               </div>
             </div>
 
@@ -185,7 +212,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <h4 className="text-golden-orange text-xs uppercase tracking-widest font-bold mb-6">Discover</h4>
               <ul className="space-y-4 text-sm text-cream/70">
                 <li><Link to="/catalog" className="hover:text-golden-orange transition-colors">The Collection</Link></li>
-                <li><Link to="/ai-stylist" className="hover:text-golden-orange transition-colors">AI Concierge</Link></li>
+                <li><Link to="/ai-stylist" className="hover:text-golden-orange transition-colors">AI Stylus</Link></li>
                 <li><Link to="/the-edit" className="hover:text-golden-orange transition-colors">The Edit</Link></li>
                 <li><Link to="/about" className="hover:text-golden-orange transition-colors">Our Story</Link></li>
               </ul>
@@ -206,9 +233,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div>
               <h4 className="text-golden-orange text-xs uppercase tracking-widest font-bold mb-6">Contact</h4>
               <ul className="space-y-4 text-sm text-cream/70">
-                <li className="flex items-center gap-2"><MapPin size={16} className="text-golden-orange"/> 125 5th Ave, NYC</li>
-                <li className="flex items-center gap-2"><Phone size={16} className="text-golden-orange"/> +1 (888) STYLUS-VIP</li>
-                <li className="flex items-center gap-2"><Mail size={16} className="text-golden-orange"/> concierge@stylus.com</li>
+                <li className="flex items-center gap-2"><MapPin size={16} className="text-golden-orange"/> Abuja, Nigeria</li>
+                <li className="flex items-center gap-2"><Phone size={16} className="text-golden-orange"/> +234 903 304 4460</li>
+                <li className="flex items-center gap-2"><Mail size={16} className="text-golden-orange"/> Stylus@gmail.com</li>
               </ul>
             </div>
           </div>

@@ -4,7 +4,7 @@ import { Category, Product, UserProfile } from './types';
 export const MOCK_PRODUCTS: Product[] = [
   {
     id: '1',
-    name: 'Midnight Velvet Evening Gown',
+    name: 'Pink Suit Gown',
     brand: 'Alexander McQueen',
     category: Category.WOMEN,
     rentalPrice: 150,
@@ -13,9 +13,9 @@ export const MOCK_PRODUCTS: Product[] = [
     isForSale: true,
     ownerId: 'stylus-official',
     images: [
-      'https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=1000&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=1000&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?q=80&w=1000&auto=format&fit=crop'
+      '/Pink.jpeg',
+      '/Melanin.jpeg',
+      '/Pearl.jpeg'
     ],
     description: 'A floor-length velvet gown featuring a dramatic neckline and intricate beadwork. Perfect for galas and red carpet events.',
     availableSizes: ['XS', 'S', 'M', 'L'],
@@ -30,7 +30,7 @@ export const MOCK_PRODUCTS: Product[] = [
   },
   {
     id: '2',
-    name: 'Oyster Perpetual Tuxedo',
+    name: 'White Perpetual Tuxedo',
     brand: 'Tom Ford',
     category: Category.MEN,
     rentalPrice: 200,
@@ -39,9 +39,9 @@ export const MOCK_PRODUCTS: Product[] = [
     isForSale: false,
     ownerId: 'stylus-official',
     images: [
-      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?q=80&w=1000&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1000&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?q=80&w=1000&auto=format&fit=crop'
+      '/White.jpeg',
+      '/Red_suit.jpeg',
+      '/Brown.jpeg'
     ],
     description: 'Impeccably tailored tuxedo with satin lapels. Exudes confidence and timeless sophistication.',
     availableSizes: ['48', '50', '52', '54'],
@@ -64,8 +64,8 @@ export const MOCK_PRODUCTS: Product[] = [
     isForSale: true,
     ownerId: '2', // Mock Partner ID
     images: [
-      'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?q=80&w=1000&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1000&auto=format&fit=crop'
+      '/Sapphire_clutch.jpg',
+      '/Royal.jpg',
     ],
     description: 'A statement piece embellished with sapphire-toned crystals and gold hardware.',
     availableSizes: ['One Size'],
@@ -87,8 +87,8 @@ export const MOCK_PRODUCTS: Product[] = [
     isForSale: false,
     ownerId: 'stylus-official',
     images: [
-      'https://images.unsplash.com/photo-1524592094714-0f0654e20314?q=80&w=1000&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1622434641406-a158123450f9?q=80&w=1000&auto=format&fit=crop'
+      '/Heritage.jpg',
+      '/Chronogragh.jpg'
     ],
     description: 'The epitome of watchmaking excellence. Hand-finished movement with a rose gold case.',
     availableSizes: ['One Size'],
@@ -102,7 +102,7 @@ export const MOCK_PRODUCTS: Product[] = [
   },
   {
     id: '5',
-    name: 'Golden Silk Wrap',
+    name: 'Brown Suit',
     brand: 'Hermès',
     category: Category.ACCESSORIES,
     rentalPrice: 60,
@@ -111,7 +111,8 @@ export const MOCK_PRODUCTS: Product[] = [
     isForSale: true,
     ownerId: 'stylus-official',
     images: [
-      'https://images.unsplash.com/photo-1601924994987-69e26d50dc26?q=80&w=1000&auto=format&fit=crop'
+      '/Brown.jpeg',
+      '/Pearl.jpeg',
     ],
     description: '100% hand-rolled silk scarf featuring the iconic equestrian motifs.',
     availableSizes: ['One Size'],
@@ -124,7 +125,7 @@ export const MOCK_PRODUCTS: Product[] = [
   },
   {
     id: '6',
-    name: 'Monogram Keepall',
+    name: 'Burgundy-Red Gown',
     brand: 'Louis Vuitton',
     category: Category.BAGS,
     rentalPrice: 120,
@@ -133,8 +134,8 @@ export const MOCK_PRODUCTS: Product[] = [
     isForSale: true,
     ownerId: '2', // Mock Partner
     images: [
-      'https://images.unsplash.com/photo-1583623025817-d180a2221d0a?q=80&w=1000&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?q=80&w=1000&auto=format&fit=crop'
+      '/Oxblood.jpeg',
+      '/Asoke.jpeg'
     ],
     description: 'The classic travel bag. Durable, stylish, and instantly recognizable.',
     availableSizes: ['55cm'],

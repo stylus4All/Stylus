@@ -98,7 +98,7 @@ const MOCK_USERS_DB: RegisteredUser[] = [
     lastActive: '1 day ago', 
     avgSpend: '$0', 
     rentalHistoryCount: 0, 
-    walletBalance: 5200, 
+    walletBalance: 7800000, 
     location: 'London, UK',
     searchHistory: [],
     verificationDocs: { 
@@ -121,7 +121,7 @@ const MOCK_USERS_DB: RegisteredUser[] = [
     lastActive: '3 months ago', 
     avgSpend: '$150', 
     rentalHistoryCount: 1, 
-    walletBalance: 200,
+    walletBalance: 300000,
     location: 'Los Angeles, USA',
     searchHistory: ['Cocktail Dresses', 'Gucci Bags']
   },
@@ -157,7 +157,7 @@ const MOCK_USERS_DB: RegisteredUser[] = [
     lastActive: '2 mins ago', 
     avgSpend: '$450', 
     rentalHistoryCount: 12, 
-    walletBalance: 1500,
+    walletBalance: 2250000,
     location: 'New York, USA',
     searchHistory: ['Gala Gowns', 'Velvet', 'Chanel'],
     verificationDocs: {

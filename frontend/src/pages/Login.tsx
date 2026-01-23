@@ -215,7 +215,7 @@ export const Login: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-black/20 border border-white/10 text-cream px-4 py-3 focus:border-golden-orange outline-none transition-colors"
-                    placeholder={isLoginMode ? "Enter 'Stylus' for demo accounts" : "email@example.com"}
+                    placeholder={isLoginMode ? "Enter your username/email" : "email@example.com"}
                     required
                 />
             </div>
@@ -272,13 +272,13 @@ export const Login: React.FC = () => {
                     {isLoginMode ? "Request Access" : "Log In"}
                 </button>
             </p>
-            {isLoginMode && (
+            {/* {isLoginMode && (
                 <div className="mt-4 text-[10px] text-cream/30 bg-black/20 p-2 rounded border border-white/5">
                     <p className="font-bold mb-1">Demo Credentials (Username: Stylus)</p>
                     <p>User Pass: StylusUser#4829</p>
                     <p>Partner Pass: StylusPartner@9931</p>
                 </div>
-            )}
+            )} */}
         </div>
       </div>
     </div>

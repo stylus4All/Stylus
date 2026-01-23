@@ -85,7 +85,7 @@ export const Catalog: React.FC = () => {
       color: 'All',
       size: 'All',
       occasion: 'All',
-      maxPrice: 5000,
+      maxPrice: 7500000,
       sortBy: 'newest'
     });
   };
@@ -139,7 +139,7 @@ export const Catalog: React.FC = () => {
                             {/* Dots */}
                             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                                 {quickViewProduct.images.map((_, idx) => (
-                                    <div key={idx} className={`w-1.5 h-1.5 rounded-full transition-all ${quickViewIndex === idx ? 'bg-golden-orange scale-125' : 'bg-white/50'}`} />
+                                    <div key={idx} className={`w-1.5 h-1.5 rounded-full transition-all ₦{quickViewIndex === idx ? 'bg-golden-orange scale-125' : 'bg-white/50'}`} />
                                 ))}
                             </div>
                         </>
@@ -153,23 +153,23 @@ export const Catalog: React.FC = () => {
                     <div className="flex flex-col gap-6 mb-8 border-t border-white/10 pt-6">
                         <div className="flex justify-between items-end">
                             <div>
-                                <p className="font-serif text-3xl text-cream animate-pulse">${quickViewProduct.rentalPrice}</p>
+                                <p className="font-serif text-3xl text-cream animate-pulse">₦{quickViewProduct.rentalPrice}</p>
                                 <p className="text-xs text-cream/40 uppercase tracking-wide">Rental / 4 Days</p>
                             </div>
                             {quickViewProduct.isForSale && (
                                 <div className="text-right">
-                                    <p className="font-serif text-3xl text-golden-orange">${quickViewProduct.buyPrice}</p>
+                                    <p className="font-serif text-3xl text-golden-orange">₦{quickViewProduct.buyPrice}</p>
                                     <p className="text-xs text-cream/40 uppercase tracking-wide">Buy Price</p>
                                 </div>
                             )}
                         </div>
                         
                         <div className="flex flex-col sm:flex-row gap-4">
-                            <Link to={`/product/${quickViewProduct.id}`} className="flex-1">
+                            <Link to={`/product/₦{quickViewProduct.id}`} className="flex-1">
                                 <Button fullWidth>Rent Now</Button>
                             </Link>
                             {quickViewProduct.isForSale && (
-                                <Link to={`/product/${quickViewProduct.id}`} className="flex-1">
+                                <Link to={`/product/₦{quickViewProduct.id}`} className="flex-1">
                                     <Button fullWidth variant="secondary">Buy Now</Button>
                                 </Link>
                             )}
@@ -231,12 +231,12 @@ export const Catalog: React.FC = () => {
                         <select 
                             value={filters.category}
                             onChange={(e) => updateFilter('category', e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 text-cream px-3 py-2.5 text-sm focus:border-golden-orange outline-none appearance-none rounded-sm cursor-pointer"
+                            className="w-full bg-[#1f0c05] border border-golden-orange/30 text-cream px-3 py-2.5 text-sm focus:border-golden-orange focus:bg-[#2a1508] outline-none appearance-none rounded-sm cursor-pointer hover:border-golden-orange/50 transition-colors"
                         >
-                            <option  className='bg-red' value="All">All Categories</option>
-                            {Object.values(Category).map(cat => <option className='bg-red' key={cat} value={cat}>{cat}</option>)}
+                            <option className='bg-espresso text-cream' value="All">All Categories</option>
+                            {Object.values(Category).map(cat => <option className='bg-espresso text-cream' key={cat} value={cat}>{cat}</option>)}
                         </select>
-                        <ChevronDown size={12} className="absolute right-3 top-3 text-cream/30 pointer-events-none"/>
+                        <ChevronDown size={12} className="absolute right-3 top-3 text-golden-orange pointer-events-none"/>
                     </div>
                 </div>
                 {/* ... other filters ... */}
@@ -246,11 +246,11 @@ export const Catalog: React.FC = () => {
                         <select 
                             value={filters.size}
                             onChange={(e) => updateFilter('size', e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 text-cream px-3 py-2.5 text-sm focus:border-golden-orange outline-none appearance-none rounded-sm cursor-pointer"
+                            className="w-full bg-[#1f0c05] border border-golden-orange/30 text-cream px-3 py-2.5 text-sm focus:border-golden-orange focus:bg-[#2a1508] outline-none appearance-none rounded-sm cursor-pointer hover:border-golden-orange/50 transition-colors"
                         >
-                            {sizes.map(s => <option key={s} value={s}>{s}</option>)}
+                            {sizes.map(s => <option className='bg-espresso text-cream' key={s} value={s}>{s}</option>)}
                         </select>
-                        <ChevronDown size={12} className="absolute right-3 top-3 text-cream/30 pointer-events-none"/>
+                        <ChevronDown size={12} className="absolute right-3 top-3 text-golden-orange pointer-events-none"/>
                     </div>
                 </div>
 
@@ -260,11 +260,11 @@ export const Catalog: React.FC = () => {
                         <select 
                             value={filters.color}
                             onChange={(e) => updateFilter('color', e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 text-cream px-3 py-2.5 text-sm focus:border-golden-orange outline-none appearance-none rounded-sm cursor-pointer"
+                            className="w-full bg-[#1f0c05] border border-golden-orange/30 text-cream px-3 py-2.5 text-sm focus:border-golden-orange focus:bg-[#2a1508] outline-none appearance-none rounded-sm cursor-pointer hover:border-golden-orange/50 transition-colors"
                         >
-                            {colors.map(c => <option key={c} value={c}>{c}</option>)}
+                            {colors.map(c => <option className='bg-espresso text-cream' key={c} value={c}>{c}</option>)}
                         </select>
-                        <ChevronDown size={12} className="absolute right-3 top-3 text-cream/30 pointer-events-none"/>
+                        <ChevronDown size={12} className="absolute right-3 top-3 text-golden-orange pointer-events-none"/>
                     </div>
                 </div>
 
@@ -274,18 +274,18 @@ export const Catalog: React.FC = () => {
                         <select 
                             value={filters.occasion}
                             onChange={(e) => updateFilter('occasion', e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 text-cream px-3 py-2.5 text-sm focus:border-golden-orange outline-none appearance-none rounded-sm cursor-pointer"
+                            className="w-full bg-[#1f0c05] border border-golden-orange/30 text-cream px-3 py-2.5 text-sm focus:border-golden-orange focus:bg-[#2a1508] outline-none appearance-none rounded-sm cursor-pointer hover:border-golden-orange/50 transition-colors"
                         >
-                            {occasions.map(o => <option key={o} value={o}>{o}</option>)}
+                            {occasions.map(o => <option className='bg-espresso text-cream' key={o} value={o}>{o}</option>)}
                         </select>
-                        <ChevronDown size={12} className="absolute right-3 top-3 text-cream/30 pointer-events-none"/>
+                        <ChevronDown size={12} className="absolute right-3 top-3 text-golden-orange pointer-events-none"/>
                     </div>
                 </div>
 
                 <div className="w-full">
                    <div className="flex justify-between mb-2">
                        <label className="text-[10px] text-cream/50 uppercase tracking-widest font-bold">Max Price</label>
-                       <span className="text-xs text-golden-orange font-bold">${filters.maxPrice}</span>
+                       <span className="text-xs text-golden-orange font-bold">₦{filters.maxPrice}</span>
                    </div>
                    <input 
                         type="range" min="50" max="5000" step="50"
@@ -306,13 +306,13 @@ export const Catalog: React.FC = () => {
                  <select
                     value={filters.sortBy}
                     onChange={(e) => updateFilter('sortBy', e.target.value as SortOption)}
-                    className="bg-[#1f0c05] border border-white/10 text-cream px-4 py-2 text-sm focus:border-golden-orange outline-none appearance-none cursor-pointer pr-8 rounded-sm"
+                    className="bg-[#1f0c05] border border-golden-orange/30 text-cream px-4 py-2 text-sm focus:border-golden-orange focus:bg-[#2a1508] outline-none appearance-none cursor-pointer pr-8 rounded-sm hover:border-golden-orange/50 transition-colors"
                 >
-                    <option value="newest">Newest Arrivals</option>
-                    <option value="price_asc">Price: Low to High</option>
-                    <option value="price_desc">Price: High to Low</option>
+                    <option className='bg-espresso text-cream' value="newest">Newest Arrivals</option>
+                    <option className='bg-espresso text-cream' value="price_asc">Price: Low to High</option>
+                    <option className='bg-espresso text-cream' value="price_desc">Price: High to Low</option>
                 </select>
-                <ArrowUpDown size={12} className="absolute right-3 top-3 text-cream/30 pointer-events-none"/>
+                <ArrowUpDown size={12} className="absolute right-3 top-3 text-golden-orange pointer-events-none"/>
              </div>
           </div>
         </div>
@@ -395,7 +395,7 @@ const ProductCard: React.FC<{ product: Product; onQuickView: (p: Product) => voi
         </div>
       </div>
       <div className="flex items-baseline justify-between mt-2 pt-3 border-t border-white/5 px-1">
-        <span className="text-cream font-medium font-serif text-lg">${product.rentalPrice} <span className="text-xs text-cream/50 font-sans font-light">/ 4 days</span></span>
+        <span className="text-cream font-medium font-serif text-lg">₦{product.rentalPrice} <span className="text-xs text-cream/50 font-sans font-light">/ 4 days</span></span>
         {product.rentalCount && product.rentalCount >= 5 && <span className="text-[10px] text-red-400 border border-red-500/50 px-2 py-0.5 rounded uppercase font-bold">Sell Only</span>}
       </div>
     </div>

@@ -28,13 +28,13 @@ export const InfoPage: React.FC<InfoPageProps> = ({ type }) => {
     }
 
     if (currentUser.walletBalance < cartTotal) {
-        if(confirm(`Insufficient funds in your wallet ($${currentUser.walletBalance.toFixed(2)}). Total needed: $${cartTotal.toFixed(2)}.\n\nWould you like to go to your dashboard to fund your wallet?`)) {
+        if(confirm(`Insufficient funds in your wallet (₦${currentUser.walletBalance.toFixed(2)}). Total needed: ₦${cartTotal.toFixed(2)}.\n\nWould you like to go to your dashboard to fund your wallet?`)) {
             navigate('/dashboard');
         }
         return;
     }
 
-    if(confirm(`Confirm payment of $${cartTotal.toFixed(2)} from your wallet?`)) {
+    if(confirm(`Confirm payment of ₦${cartTotal.toFixed(2)} from your wallet?`)) {
         
         // Process Payments for each item
         cart.forEach(item => {
@@ -156,7 +156,7 @@ export const InfoPage: React.FC<InfoPageProps> = ({ type }) => {
                                      {item.type === 'buy' ? 'Purchasing' : 'Renting'}
                                 </span>
                              </div>
-                             <p className="font-serif text-lg text-cream">${item.price}</p>
+                             <p className="font-serif text-lg text-cream">₦{item.price}</p>
                           </div>
                           
                           <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-cream/60">
@@ -186,14 +186,14 @@ export const InfoPage: React.FC<InfoPageProps> = ({ type }) => {
                 <div className="border-t-2 border-golden-orange pt-6 mb-8">
                    <div className="flex justify-between items-center mb-2">
                       <span className="font-serif text-xl text-cream">Subtotal</span>
-                      <span className="font-serif text-3xl text-golden-orange">${cartTotal}</span>
+                      <span className="font-serif text-3xl text-golden-orange">₦{cartTotal}</span>
                    </div>
                    
                    {isAuthenticated && currentUser && (
                        <div className={`flex justify-between items-center mb-6 p-4 rounded-sm border ${currentUser.walletBalance >= cartTotal ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
                            <div className="flex items-center gap-2">
                                <Wallet size={16} className={currentUser.walletBalance >= cartTotal ? 'text-green-400' : 'text-red-400'}/>
-                               <span className="text-sm text-cream">Wallet Balance: <span className="font-bold">${currentUser.walletBalance.toFixed(2)}</span></span>
+                               <span className="text-sm text-cream">Wallet Balance: <span className="font-bold">₦{currentUser.walletBalance.toFixed(2)}</span></span>
                            </div>
                            {currentUser.walletBalance < cartTotal && (
                                <Link to="/dashboard" className="text-xs underline text-golden-orange hover:text-white">Fund Wallet</Link>
@@ -227,7 +227,7 @@ export const InfoPage: React.FC<InfoPageProps> = ({ type }) => {
         </div>
         <h1 className="font-serif text-5xl text-cream mb-12">{current.title}</h1>
         
-        <div className="text-left bg-[#1f0c05] p-10 border border-white/5 shadow-2xl rounded-sm flex flex-col items-center text-center">
+        <div className=" bg-[#1f0c05] p-10 border border-white/5 shadow-2xl rounded-sm flex flex-col items-center text-center">
           <div className="text-cream/80 leading-relaxed text-lg font-light w-full">
             {current.text}
           </div>

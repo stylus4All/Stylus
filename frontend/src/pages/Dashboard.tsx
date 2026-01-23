@@ -296,12 +296,12 @@ export const Dashboard: React.FC = () => {
                   
                   <div className="bg-golden-orange/10 p-4 mb-6 border border-golden-orange/20 text-center">
                       <p className="text-xs text-golden-orange uppercase">Available Balance</p>
-                      <p className="text-2xl font-serif text-cream">${currentUser.walletBalance.toFixed(2)}</p>
+                      <p className="text-2xl font-serif text-cream">₦{currentUser.walletBalance.toFixed(2)}</p>
                   </div>
 
                   <form onSubmit={handleWithdrawSubmit} className="space-y-4">
                       <div>
-                          <label className="text-xs text-cream/50 mb-1 block uppercase">Amount to Withdraw ($)</label>
+                          <label className="text-xs text-cream/50 mb-1 block uppercase">Amount to Withdraw (₦)</label>
                           <input 
                             type="number" 
                             required 
@@ -359,7 +359,7 @@ export const Dashboard: React.FC = () => {
                   
                   <form onSubmit={handleFundWallet} className="space-y-4">
                       <div>
-                          <label className="text-xs text-cream/50 mb-1 block uppercase">Amount to Add ($)</label>
+                          <label className="text-xs text-cream/50 mb-1 block uppercase">Amount to Add (₦)</label>
                           <div className="relative">
                               <DollarSign size={16} className="absolute left-3 top-3 text-golden-orange"/>
                               <input 
@@ -443,7 +443,7 @@ export const Dashboard: React.FC = () => {
                        <p className="text-xs uppercase text-cream/40">Wallet Balance</p>
                        <Wallet size={14} className="text-golden-orange"/>
                    </div>
-                   <p className="text-2xl font-serif text-golden-orange mb-3">${currentUser.walletBalance.toFixed(2)}</p>
+                   <p className="text-2xl font-serif text-golden-orange mb-3">₦{currentUser.walletBalance.toFixed(2)}</p>
                    
                    {currentUser.role === 'Partner' ? (
                        <div className="flex gap-2">
@@ -490,7 +490,7 @@ export const Dashboard: React.FC = () => {
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                      <div className="bg-white/5 p-6 border border-white/10">
                          <h3 className="text-cream/50 uppercase text-xs">Total Earnings</h3>
-                         <p className="text-3xl text-golden-orange font-serif">${currentUser.walletBalance}</p>
+                         <p className="text-3xl text-golden-orange font-serif">₦{currentUser.walletBalance}</p>
                      </div>
                      <div className="bg-white/5 p-6 border border-white/10">
                          <h3 className="text-cream/50 uppercase text-xs">Active Listings</h3>
@@ -539,7 +539,7 @@ export const Dashboard: React.FC = () => {
                                                 {tx.type}
                                             </span>
                                         </td>
-                                        <td className="p-4 font-serif text-cream">${tx.amount.toLocaleString()}</td>
+                                        <td className="p-4 font-serif text-cream">₦{tx.amount.toLocaleString()}</td>
                                         <td className="p-4">
                                             <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded ${
                                                 tx.status === 'Completed' ? 'bg-green-500/10 text-green-400' : 
@@ -584,11 +584,11 @@ export const Dashboard: React.FC = () => {
                             </div>
                             <div className="grid grid-cols-3 gap-6">
                                 <div>
-                                    <label className="text-xs text-cream/50 mb-1 block">Rent Price ($)</label>
+                                    <label className="text-xs text-cream/50 mb-1 block">Rent Price (₦)</label>
                                     <input required type="number" placeholder="0.00" value={newItem.rentalPrice} onChange={e => setNewItem({...newItem, rentalPrice: Number(e.target.value)})} className="w-full bg-black/20 border border-white/10 p-3 text-cream focus:border-golden-orange outline-none" />
                                 </div>
                                 <div>
-                                    <label className="text-xs text-cream/50 mb-1 block">Buy Price ($)</label>
+                                    <label className="text-xs text-cream/50 mb-1 block">Buy Price (₦)</label>
                                     <input type="number" placeholder="0.00 (Optional)" value={newItem.buyPrice} onChange={e => setNewItem({...newItem, buyPrice: Number(e.target.value)})} className="w-full bg-black/20 border border-white/10 p-3 text-cream focus:border-golden-orange outline-none" />
                                 </div>
                                 <div className="flex flex-col justify-end pb-3">
@@ -665,8 +665,8 @@ export const Dashboard: React.FC = () => {
                              <div className="flex-grow">
                                  <h4 className="text-cream font-bold text-lg">{item.name}</h4>
                                  <div className="flex flex-wrap gap-4 text-sm text-cream/70 mt-1">
-                                     <span>Rent: ${item.rentalPrice}</span>
-                                     {item.isForSale && <span>Buy: ${item.buyPrice}</span>}
+                                     <span>Rent: ₦{item.rentalPrice}</span>
+                                     {item.isForSale && <span>Buy: ₦{item.buyPrice}</span>}
                                  </div>
                                  <div className="flex items-center gap-4 mt-2">
                                     <span className="text-xs text-cream/50 bg-black/20 px-2 py-1 rounded">Rentals: {item.rentalCount || 0}/5</span>
@@ -710,7 +710,7 @@ export const Dashboard: React.FC = () => {
                                                  <span>Type: <span className="text-golden-orange uppercase">{item.type}</span></span>
                                                  {item.duration && <span>Duration: {item.duration} Days</span>}
                                              </div>
-                                             <p className="text-lg font-serif text-golden-orange mt-2">${item.price}</p>
+                                             <p className="text-lg font-serif text-golden-orange mt-2">₦{item.price}</p>
                                          </div>
                                          <div className="flex flex-col items-end justify-center min-w-[150px]">
                                              <div className="mb-2">
