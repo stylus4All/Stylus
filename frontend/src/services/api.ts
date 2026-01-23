@@ -1,4 +1,4 @@
-const API_BASE_URL = (import.meta.env as any).VITE_API_BASE_URL || 'http://localhost:4000';
+const API_BASE_URL = (import.meta.env as any).VITE_API_BASE_URL || 'https://stylus-backend.netlify.app/';
 
 // Helper function for API calls
 async function apiCall(endpoint: string, options: RequestInit = {}) {
