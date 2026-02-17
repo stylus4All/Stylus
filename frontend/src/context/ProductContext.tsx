@@ -6,6 +6,7 @@ interface ProductContextType {
   products: Product[];
   addProduct: (product: Product) => void;
   removeProduct: (productId: string) => void;
+  updateProduct: (productId: string, patch: Partial<Product>) => void;
   incrementRentalCount: (productId: string) => void;
 }
 
@@ -28,6 +29,10 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const removeProduct = (productId: string) => {
     setProducts((prev) => prev.filter(p => p.id !== productId));
+  };
+
+  const updateProduct = (productId: string, patch: Partial<Product>) => {
+    setProducts(prev => prev.map(p => p.id === productId ? { ...p, ...patch } : p));
   };
 
   const incrementRentalCount = (productId: string) => {
@@ -58,7 +63,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   return (
-    <ProductContext.Provider value={{ products, addProduct, removeProduct, incrementRentalCount }}>
+    <ProductContext.Provider value={{ products, addProduct, removeProduct, updateProduct, incrementRentalCount }}>
       {children}
     </ProductContext.Provider>
   );

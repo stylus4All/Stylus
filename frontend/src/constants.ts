@@ -75,6 +75,8 @@ export const MOCK_PRODUCTS: Product[] = [
       { id: 'r6', author: 'Claire D.', rating: 5, comment: 'The perfect pop of color for my neutral outfit.', date: '2024-03-01' }
     ],
     rentalCount: 0
+    ,
+    approval: { images: 'Pending', price: 'Pending', description: 'Pending', status: 'Pending' }
   },
   {
     id: '4',
@@ -146,6 +148,8 @@ export const MOCK_PRODUCTS: Product[] = [
         { id: 'r5b', author: 'David C.', rating: 5, comment: 'Highly recommended for short business trips.', date: '2024-03-10' }
     ],
     rentalCount: 15
+    ,
+    approval: { images: 'Pending', price: 'Pending', description: 'Pending', status: 'Pending' }
   }
 ];
 

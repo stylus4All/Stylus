@@ -60,3 +60,37 @@
     animation: pulse-glow 3s ease-in-out infinite;
   }
 }
+
+/* Style native select dropdown and options to match project palette where supported */
+select {
+  background-color: #1f0c05; /* match existing select bg */
+  color: #f7f3ea;
+}
+
+select:focus, select:hover {
+  background-color: #2a1508; /* project hover */
+  outline: none;
+  box-shadow: none;
+}
+
+select option {
+  background-color: #1f0c05;
+  color: #f7f3ea;
+}
+
+select option:hover, select option:checked {
+  background-color: #2a1508;
+  color: #f7f3ea;
+}
+
+/* Hide default IE/Edge dropdown arrow styling where possible */
+select::-ms-expand {
+  display: none;
+}
+
+/* For WebKit browsers, ensure appearance removed so our styles apply */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}

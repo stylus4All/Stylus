@@ -10,6 +10,7 @@ import cartRoutes from './routes/cart';
 import wishlistRoutes from './routes/wishlist';
 import transactionRoutes from './routes/transactions';
 import reviewRoutes from './routes/reviews';
+import adminRoutes from './routes/admin';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Root endpoint
 app.get('/', (_req: Request, res: Response) => {

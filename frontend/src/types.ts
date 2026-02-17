@@ -42,6 +42,13 @@ export interface Product {
   rentalCount?: number;
   autoSellAfterRentals?: number;
   rentalDuration?: number;
+  approval?: {
+    images?: 'Pending' | 'Approved' | 'Rejected';
+    price?: 'Pending' | 'Approved' | 'Rejected';
+    description?: 'Pending' | 'Approved' | 'Rejected';
+    status?: 'Pending' | 'Approved' | 'Rejected';
+    notes?: string;
+  };
 }
 
 export interface ProductFilter {

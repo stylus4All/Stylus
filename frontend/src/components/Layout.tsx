@@ -51,18 +51,18 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Link to="/contact" className={`font-serif uppercase tracking-wider text-xs ${isActive('/contact')}`}>Contact</Link>
               <Link to="/catalog" className={`font-serif uppercase tracking-wider text-xs ${isActive('/catalog')}`}>Collection</Link>
               
-              {isAuthenticated && isAdmin ? (
-                <Link to="/admin" className={`font-serif uppercase tracking-wider text-xs relative ${isActive('/admin')}`}>
-                  Admin Dashboard
-                  {pendingVerificationsCount > 0 && (
-                    <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full animate-pulse">
-                      {pendingVerificationsCount}
-                    </span>
-                  )}
-                </Link>
-              ) : isAuthenticated ? (
+              {/* Admin link intentionally left unprotected for now (visible to all) per request */}
+              {/* <Link to="/admin" className={`font-serif uppercase tracking-wider text-xs relative ${isActive('/admin')}`}>
+                Admin Dashboard
+                {pendingVerificationsCount > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full animate-pulse">
+                    {pendingVerificationsCount}
+                  </span>
+                )}
+              </Link> */}
+              {/* {isAuthenticated && !isAdmin && (
                 <Link to="/dashboard" className={`font-serif uppercase tracking-wider text-xs ${isActive('/dashboard')}`}>My Dashboard</Link>
-              ) : null}
+              )} */}
             </div>
 
             {/* Icons & Login */}
@@ -94,11 +94,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               </Link>
               {isAuthenticated ? (
                 <>
-                  <Link to={isAdmin ? "/admin" : "/dashboard"} className="text-cream hover:text-golden-orange transition-colors relative" title={isAdmin ? "Admin Portal" : "My Dashboard"}>
+                  <Link to="/dashboard" className="text-cream hover:text-golden-orange transition-colors relative" title="My Dashboard">
                     <User size={20} />
-                    {isAdmin && pendingVerificationsCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 w-2.5 h-2.5 rounded-full border border-espresso"></span>
-                    )}
                   </Link>
                   <button onClick={handleLogout} className="text-cream hover:text-golden-orange transition-colors" title="Sign Out">
                     <LogOut size={20} />
@@ -154,12 +151,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               
               {isAuthenticated ? (
                 <>
-                  {isAdmin ? (
-                    <Link to="/admin" onClick={closeMobileMenu} className="text-cream hover:text-golden-orange font-serif text-lg border-b border-white/5 pb-2 flex justify-between items-center">
-                      Admin Dashboard
-                      {pendingVerificationsCount > 0 && <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{pendingVerificationsCount} New</span>}
-                    </Link>
-                  ) : (
+                  {!isAdmin && (
                     <Link to="/dashboard" onClick={closeMobileMenu} className="text-cream hover:text-golden-orange font-serif text-lg border-b border-white/5 pb-2">My Dashboard</Link>
                   )}
                   <Link to="/bag" onClick={closeMobileMenu} className="text-cream hover:text-golden-orange font-serif text-lg border-b border-white/5 pb-2 flex items-center justify-between">

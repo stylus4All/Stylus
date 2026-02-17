@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
 import { Catalog } from './pages/Catalog';
@@ -28,11 +28,12 @@ function App() {
         <CartProvider>
           <WishlistProvider>
             <OrderProvider>
-              <HashRouter>
+              <Router>
                 <Layout>
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/about" element={<About />} />
+                    {/* <Route path="/admin" element={<AdminDashboard />} /> */}
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/catalog" element={<Catalog />} />
@@ -54,14 +55,14 @@ function App() {
                         </ProtectedRoute>
                       } 
                     />
-                    <Route 
+                    {/* <Route 
                       path="/admin" 
                       element={
                         <ProtectedRoute requireAdmin={true}>
                           <AdminDashboard />
                         </ProtectedRoute>
                       } 
-                    />
+                    /> */}
                     
                     <Route path="/ai-stylist" element={<AIStylistPage />} />
                     
@@ -71,9 +72,11 @@ function App() {
                     <Route path="/terms" element={<InfoPage type="terms" />} />
                     <Route path="/authenticity" element={<InfoPage type="authenticity" />} />
                     <Route path="/bag" element={<InfoPage type="bag" />} />
+                    
+                    <Route path="/admin" element={<AdminDashboard />} />
                   </Routes>
                 </Layout>
-              </HashRouter>
+              </Router>
             </OrderProvider>
           </WishlistProvider>
         </CartProvider>
