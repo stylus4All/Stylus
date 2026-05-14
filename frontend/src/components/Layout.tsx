@@ -113,9 +113,18 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   >
                     <span className="text-xs uppercase tracking-widest font-bold">Sign Up</span>
                   </Link>
+                  
                 </div>
               )}
             </div>
+
+            {/* WAITLIST BUTTON */}
+<a
+  href="#waitlist-form"
+  className="flex items-center space-x-2 text-golden-orange border border-golden-orange/50 px-4 py-2 hover:bg-golden-orange hover:text-espresso transition-all"
+>
+  Join Waitlist
+</a>
 
             {/* Mobile Menu Button */}
             <div className="md:hidden flex items-center">
@@ -166,8 +175,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <div className="flex flex-col gap-4 mt-4">
                   <Link to="/login" onClick={closeMobileMenu} className="text-center py-3 border border-white/20 text-cream uppercase tracking-widest text-xs">Log In</Link>
                   <Link to="/login" state={{ mode: 'signup' }} onClick={closeMobileMenu} className="text-center py-3 bg-golden-orange text-espresso font-bold uppercase tracking-widest text-xs">Sign Up</Link>
+                  
                 </div>
               )}
+              
             </div>
           </div>
         )}

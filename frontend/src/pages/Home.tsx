@@ -16,9 +16,31 @@ export const Home: React.FC = () => {
   // --- Hero Slider Logic ---
   const heroImages = [
    "/Beaded.jpeg",
+   "/Image 11.JPG",
    "/Pearl.jpeg",
+   "/Image 12.JPG",
    "/Asoke.jpeg",
+   "/Image 13.JPG",
    "/Red_suit.jpeg",
+   "/Image 4.JPG",
+   "/Image 5.JPG",
+   "/Image 1.JPG",
+   "/Image 2.JPG",
+   "/Image 3.JPG",
+   "/Image 6.JPG",
+   "/Image 7.JPG",
+   "/Image 8.JPG",
+   "/Image 9.JPG",
+   "/Image 10.JPG",
+   "/Image 25.JPG",
+   "/Image 24.JPG",
+   "/Image 22.JPG",
+   "/Image 27.JPG",
+   "/Image 26.JPG",
+   "/Image 23.JPG",
+   "/Image 20.JPG",
+   "/Image 21.JPG",
+
   ];
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -231,7 +253,78 @@ export const Home: React.FC = () => {
             </div>
          </div>
       </section>
+<section
+  id="waitlist-form"
+  className="py-24 bg-[#1a0a04] relative overflow-hidden border-t border-golden-orange/20"
+>
+<form
+  onSubmit={(e) => {
+    e.preventDefault();
+    alert("Thank you for joining!");
+  }}
+  className="max-w-xl mx-auto"
+>
+  <div className="bg-white/5 border border-golden-orange/20 rounded-xl p-8 backdrop-blur-sm">
 
+    {/* Full Name */}
+    <div className="mb-5">
+      <label className="block text-sm text-cream mb-2">Full Name</label>
+      <input
+        type="text"
+        placeholder="full name"
+        className="w-full px-4 py-3 rounded-md bg-espresso text-cream placeholder-cream/40 border border-golden-orange/20 focus:border-golden-orange focus:ring-1 focus:ring-golden-orange/30 outline-none"
+      />
+    </div>
+
+    {/* Email */}
+    <div className="mb-5">
+      <label className="block text-sm text-cream mb-2">Email Address</label>
+      <input
+        type="email"
+        placeholder="email address"
+        className="w-full px-4 py-3 rounded-md bg-espresso text-cream placeholder-cream/40 border border-golden-orange/20 focus:border-golden-orange focus:ring-1 focus:ring-golden-orange/30 outline-none"
+      />
+    </div>
+
+    {/* Company */}
+    <div className="mb-5">
+      <label className="block text-sm text-cream mb-2">
+        Location
+      </label>
+      <input
+        type="text"
+        placeholder="location"
+        className="w-full px-4 py-3 rounded-md bg-espresso text-cream placeholder-cream/40 border border-golden-orange/20 focus:border-golden-orange focus:ring-1 focus:ring-golden-orange/30 outline-none"
+      />
+    </div>
+
+    {/* Dropdown */}
+    <div className="mb-6">
+      <label className="block text-sm text-cream mb-2">
+        What Best Describes You?
+      </label>
+      <select className="w-full px-4 py-3 rounded-md bg-espresso text-cream border border-golden-orange/20 focus:border-golden-orange focus:ring-1 focus:ring-golden-orange/30 outline-none">
+        <option>Select an option</option>
+        <option>Customer</option>
+        <option>Designer</option>
+        <option>Brand</option>
+      </select>
+    </div>
+    <button
+      type="submit"
+      className="w-full py-3 rounded-md bg-golden-orange text-espresso font-semibold hover:bg-golden-light transition"
+    >
+      Join Waitlist
+    </button>
+
+    {/* Footer Text */}
+    <p className="text-xs text-cream/50 text-center mt-4 leading-relaxed">
+      We’ll keep you updated with beta access and exclusive insights—no spam,
+      promise. By submitting this form, you agree to our Privacy Policy.
+    </p>
+  </div>
+</form>
+</section>
       {/* 6. OUR TEAM */}
       <section className="py-32 bg-[#1a0a04] relative overflow-hidden">
          <div className="absolute top-20 left-0 w-[300px] h-[300px] bg-golden-orange/5 rounded-full blur-[100px]"></div>
@@ -337,3 +430,4 @@ export const Home: React.FC = () => {
     </div>
   );
 };
+
