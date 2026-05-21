@@ -1,14 +1,18 @@
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
 async function main() {
+  const hashedPassword = await bcrypt.hash('DemoPassword!1', 10);
+
   // Create or find demo user
   let user = await prisma.user.findUnique({ where: { email: 'demo@stylus.test' } });
   if (!user) {
     user = await prisma.user.create({
       data: {
         email: 'demo@stylus.test',
+        password: hashedPassword,
         name: 'Demo User',
         phone: '+1234567890',
         address: '123 Demo Street',
@@ -185,6 +189,56 @@ async function main() {
     } else {
       console.log('Product exists, skipping', p.id);
     }
+  }
+
+  const waitlistEntries = [
+    {
+      name: 'Amina Bello',
+      email: 'amina.bello@example.com',
+      location: 'Lagos, Nigeria',
+      audience: 'Customer',
+    },
+    {
+      name: 'Chinedu Okafor',
+      email: 'chinedu.okafor@example.com',
+      location: 'Abuja, Nigeria',
+      audience: 'Brand',
+    },
+    {
+      name: 'Zara Mensah',
+      email: 'zara.mensah@example.com',
+      location: 'Accra, Ghana',
+      audience: 'Designer',
+    },
+  ];
+
+  for (const entry of waitlistEntries) {
+    await prisma.$executeRaw`
+      INSERT INTO "WaitlistEntry" (
+        "id",
+        "name",
+        "email",
+        "location",
+        "audience",
+        "createdAt",
+        "updatedAt"
+      )
+      VALUES (
+        ${`seed-${entry.email}`},
+        ${entry.name},
+        ${entry.email},
+        ${entry.location ?? null},
+        ${entry.audience ?? null},
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+      ON CONFLICT ("email") DO UPDATE SET
+        "name" = excluded."name",
+        "location" = excluded."location",
+        "audience" = excluded."audience",
+        "updatedAt" = CURRENT_TIMESTAMP
+    `;
+    console.log('Upserted waitlist entry', entry.email);
   }
 
   console.log('Seeding complete');

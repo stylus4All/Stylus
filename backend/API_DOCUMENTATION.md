@@ -60,7 +60,7 @@ npm start
 
 ### Base URL
 ```
-http://localhost:4000/api
+https://stylus-qjik.onrender.com/api
 ```
 
 ### Health Check

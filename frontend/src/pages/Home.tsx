@@ -4,7 +4,9 @@ import { Button } from '../components/Button';
 import { ShieldCheck, Truck, Sparkles, Diamond, ShoppingBag, DollarSign, Star, BrainCircuit } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useProduct } from '../context/ProductContext';
+import { CartItem } from '../context/CartContext';
 import { Product } from '../types';
+import { waitlistAPI } from '../services/api';
 
 
 
@@ -12,6 +14,17 @@ import { Product } from '../types';
 export const Home: React.FC = () => {
   const { products } = useProduct();
   const { addToCart } = useCart();
+   const [waitlistForm, setWaitlistForm] = useState({
+      name: '',
+      email: '',
+      location: '',
+     audience: ''
+   });
+   const [waitlistStatus, setWaitlistStatus] = useState<{ type: 'idle' | 'success' | 'error'; message: string }>({
+      type: 'idle',
+      message: ''
+   });
+   const [isSubmittingWaitlist, setIsSubmittingWaitlist] = useState(false);
 
   // --- Hero Slider Logic ---
   const heroImages = [
@@ -70,18 +83,47 @@ export const Home: React.FC = () => {
     const today = new Date();
     const endDate = new Date();
     endDate.setDate(today.getDate() + 4);
+      const cartItem: CartItem = {
+         id: `${product.id}-${Date.now()}`,
+         product,
+         selectedSize: product.availableSizes[0] || 'One Size',
+         type: 'rent',
+         duration: 4,
+         price: product.rentalPrice,
+         startDate: today.toLocaleDateString(),
+         endDate: endDate.toLocaleDateString()
+      };
     
-    addToCart({
-        id: `${product.id}-${Date.now()}`,
-        product: product,
-        selectedSize: product.availableSizes[0] || 'One Size',
-        duration: 4,
-        price: product.rentalPrice,
-        startDate: today.toLocaleDateString(),
-        endDate: endDate.toLocaleDateString()
-    });
+      addToCart(cartItem);
     alert(`${product.name} added to your bag.`);
   };
+
+   const handleWaitlistSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setIsSubmittingWaitlist(true);
+      setWaitlistStatus({ type: 'idle', message: '' });
+
+      try {
+         await waitlistAPI.join(waitlistForm);
+         setWaitlistStatus({
+            type: 'success',
+            message: 'You have been added to the waitlist. We will be in touch soon.'
+         });
+         setWaitlistForm({
+            name: '',
+            email: '',
+            location: '',
+              audience: ''
+         });
+      } catch (error: any) {
+         setWaitlistStatus({
+            type: 'error',
+            message: error.message || 'Unable to join the waitlist right now.'
+         });
+      } finally {
+         setIsSubmittingWaitlist(false);
+      }
+   };
 
   return (
     <div className="animate-fade-in relative">
@@ -258,10 +300,7 @@ export const Home: React.FC = () => {
   className="py-24 bg-[#1a0a04] relative overflow-hidden border-t border-golden-orange/20"
 >
 <form
-  onSubmit={(e) => {
-    e.preventDefault();
-    alert("Thank you for joining!");
-  }}
+   onSubmit={handleWaitlistSubmit}
   className="max-w-xl mx-auto"
 >
   <div className="bg-white/5 border border-golden-orange/20 rounded-xl p-8 backdrop-blur-sm">
@@ -271,6 +310,9 @@ export const Home: React.FC = () => {
       <label className="block text-sm text-cream mb-2">Full Name</label>
       <input
         type="text"
+            value={waitlistForm.name}
+            onChange={(e) => setWaitlistForm((prev) => ({ ...prev, name: e.target.value }))}
+            required
         placeholder="full name"
         className="w-full px-4 py-3 rounded-md bg-espresso text-cream placeholder-cream/40 border border-golden-orange/20 focus:border-golden-orange focus:ring-1 focus:ring-golden-orange/30 outline-none"
       />
@@ -281,18 +323,23 @@ export const Home: React.FC = () => {
       <label className="block text-sm text-cream mb-2">Email Address</label>
       <input
         type="email"
+            value={waitlistForm.email}
+            onChange={(e) => setWaitlistForm((prev) => ({ ...prev, email: e.target.value }))}
+            required
         placeholder="email address"
         className="w-full px-4 py-3 rounded-md bg-espresso text-cream placeholder-cream/40 border border-golden-orange/20 focus:border-golden-orange focus:ring-1 focus:ring-golden-orange/30 outline-none"
       />
     </div>
 
-    {/* Company */}
+    {/* Location */}
     <div className="mb-5">
       <label className="block text-sm text-cream mb-2">
         Location
       </label>
       <input
         type="text"
+            value={waitlistForm.location}
+            onChange={(e) => setWaitlistForm((prev) => ({ ...prev, location: e.target.value }))}
         placeholder="location"
         className="w-full px-4 py-3 rounded-md bg-espresso text-cream placeholder-cream/40 border border-golden-orange/20 focus:border-golden-orange focus:ring-1 focus:ring-golden-orange/30 outline-none"
       />
@@ -303,19 +350,30 @@ export const Home: React.FC = () => {
       <label className="block text-sm text-cream mb-2">
         What Best Describes You?
       </label>
-      <select className="w-full px-4 py-3 rounded-md bg-espresso text-cream border border-golden-orange/20 focus:border-golden-orange focus:ring-1 focus:ring-golden-orange/30 outline-none">
-        <option>Select an option</option>
-        <option>Customer</option>
-        <option>Designer</option>
-        <option>Brand</option>
+         <select
+            value={waitlistForm.audience}
+            onChange={(e) => setWaitlistForm((prev) => ({ ...prev, audience: e.target.value }))}
+            className="w-full px-4 py-3 rounded-md bg-espresso text-cream border border-golden-orange/20 focus:border-golden-orange focus:ring-1 focus:ring-golden-orange/30 outline-none"
+         >
+           <option value="">Select an option</option>
+           <option value="Customer">Customer</option>
+           <option value="Designer">Designer</option>
+           <option value="Brand">Brand</option>
       </select>
     </div>
     <button
       type="submit"
+         disabled={isSubmittingWaitlist}
       className="w-full py-3 rounded-md bg-golden-orange text-espresso font-semibold hover:bg-golden-light transition"
     >
-      Join Waitlist
+         {isSubmittingWaitlist ? 'Joining...' : 'Join Waitlist'}
     </button>
+
+      {waitlistStatus.type !== 'idle' && (
+         <p className={`mt-4 text-sm text-center ${waitlistStatus.type === 'success' ? 'text-golden-orange' : 'text-red-300'}`}>
+            {waitlistStatus.message}
+         </p>
+      )}
 
     {/* Footer Text */}
     <p className="text-xs text-cream/50 text-center mt-4 leading-relaxed">
