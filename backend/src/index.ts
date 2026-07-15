@@ -11,6 +11,7 @@ import wishlistRoutes from './routes/wishlist';
 import transactionRoutes from './routes/transactions';
 import reviewRoutes from './routes/reviews';
 import adminRoutes from './routes/admin';
+import waitlistRoutes from './routes/waitlist';
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/waitlist', waitlistRoutes);
 
 // Root endpoint
 app.get('/', (_req: Request, res: Response) => {
@@ -50,6 +52,7 @@ app.get('/', (_req: Request, res: Response) => {
       wishlist: '/api/wishlist',
       transactions: '/api/transactions',
       reviews: '/api/reviews',
+      waitlist: '/api/waitlist',
       health: '/health'
     }
   });

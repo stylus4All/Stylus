@@ -1,9 +1,12 @@
-const API_BASE_URL = (import.meta.env as any).VITE_API_BASE_URL || 'http://localhost:4000';
+const API_BASE_URL =
+  (import.meta.env as any).VITE_API_BASE_URL ||
+  (import.meta.env as any).VITE_API_URL ||
+  'http://localhost:4000';
 
 // Helper function for API calls
 async function apiCall(endpoint: string, options: RequestInit = {}) {
   // Ensure the final request targets the backend's `/api` prefix.
-  const base = API_BASE_URL.replace(/\/$/, '');
+  const base = API_BASE_URL.replace(/\/$/, '').replace(/\/api$/, '');
   const path = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
   const url = `${base}${path}`;
   
@@ -19,8 +22,22 @@ async function apiCall(endpoint: string, options: RequestInit = {}) {
   const response = await fetch(url, { ...options, headers });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || `API error: ${response.status}`);
+    const contentType = response.headers.get('content-type') || '';
+    const responseText = await response.text();
+    let errorMessage = `API error: ${response.status}`;
+
+    if (contentType.includes('application/json')) {
+      try {
+        const error = JSON.parse(responseText);
+        errorMessage = error.error || errorMessage;
+      } catch {
+        // Fall through to the raw response body if JSON parsing fails.
+      }
+    } else if (responseText) {
+      errorMessage = responseText;
+    }
+
+    throw new Error(errorMessage);
   }
 
   return response.json();
@@ -145,6 +162,7 @@ export const transactionAPI = {
   transfer: (data: any) => apiCall('/transactions/transfer', { method: 'POST', body: JSON.stringify(data) }),
 };
 
+<<<<<<< HEAD
 // Admin APIs (requires admin-auth token)
 export const adminAPI = {
   getOverview: () => apiCall('/admin/overview'),
@@ -155,4 +173,11 @@ export const adminAPI = {
   getOrders: () => apiCall('/admin/orders'),
   updateOrderStatus: (id: string, data: any) => apiCall(`/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteOrder: (id: string) => apiCall(`/admin/orders/${id}`, { method: 'DELETE' }),
+=======
+// Waitlist APIs
+export const waitlistAPI = {
+  join: (data: { name: string; email: string; location?: string; audience?: string }) =>
+    apiCall('/waitlist', { method: 'POST', body: JSON.stringify(data) }),
+  getAll: () => apiCall('/waitlist'),
+>>>>>>> 38f7848457c76eadd31043ed81909a7ee6727d36
 };

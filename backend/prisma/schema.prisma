@@ -160,6 +160,7 @@ model Transaction {
   order                 Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
 }
 
+<<<<<<< HEAD
 model AdminAudit {
   id        Int      @id @default(autoincrement())
   actorId   Int?
@@ -168,4 +169,14 @@ model AdminAudit {
   details   String?
   ip        String?
   createdAt DateTime @default(now())
+=======
+model WaitlistEntry {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  location    String?
+  audience    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+>>>>>>> 38f7848457c76eadd31043ed81909a7ee6727d36
 }
