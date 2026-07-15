@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Category, Product, ProductFilter, SortOption } from '../types';
 import { Filter, Search, X, Eye, ArrowUpDown, Heart, ShoppingBag, SlidersHorizontal, ChevronDown, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import CustomSelect from '../components/CustomSelect';
+import { useToast } from '../components/ToastProvider';
 import { useProduct } from '../context/ProductContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
@@ -18,6 +19,7 @@ export const Catalog: React.FC = () => {
   
   // AI Recommendations
   const [aiRecs, setAiRecs] = useState<string>('');
+  const toast = useToast();
   
   // Consolidated Filter State
   const [filters, setFilters] = useState<ProductFilter>({
@@ -139,9 +141,9 @@ export const Catalog: React.FC = () => {
                             </button>
                             {/* Dots */}
                             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                                {quickViewProduct.images.map((_, idx) => (
-                                    <div key={idx} className={`w-1.5 h-1.5 rounded-full transition-all ₦{quickViewIndex === idx ? 'bg-golden-orange scale-125' : 'bg-white/50'}`} />
-                                ))}
+                              {quickViewProduct.images.map((_, idx) => (
+                                <div key={idx} className={`w-1.5 h-1.5 rounded-full transition-all ${quickViewIndex === idx ? 'bg-golden-orange scale-125' : 'bg-white/50'}`} />
+                              ))}
                             </div>
                         </>
                     )}
@@ -166,15 +168,15 @@ export const Catalog: React.FC = () => {
                         </div>
                         
                         <div className="flex flex-col sm:flex-row gap-4">
-                            <Link to={`/product/₦{quickViewProduct.id}`} className="flex-1">
-                                <Button fullWidth>Rent Now</Button>
-                            </Link>
-                            {quickViewProduct.isForSale && (
-                                <Link to={`/product/₦{quickViewProduct.id}`} className="flex-1">
-                                    <Button fullWidth variant="secondary">Buy Now</Button>
-                                </Link>
-                            )}
-                        </div>
+                        <Link to={`/product/${quickViewProduct.id}`} className="flex-1">
+                          <Button fullWidth>Rent Now</Button>
+                        </Link>
+                        {quickViewProduct.isForSale && (
+                          <Link to={`/product/${quickViewProduct.id}`} className="flex-1">
+                            <Button fullWidth variant="secondary">Buy Now</Button>
+                          </Link>
+                        )}
+                      </div>
                     </div>
                 </div>
             </div>
@@ -321,6 +323,7 @@ export const Catalog: React.FC = () => {
 const ProductCard: React.FC<{ product: Product; onQuickView: (p: Product) => void }> = ({ product, onQuickView }) => {
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const toast = useToast();
   const isWishlisted = isInWishlist(product.id);
 
   const handleQuickAdd = (e: React.MouseEvent) => {
@@ -336,7 +339,7 @@ const ProductCard: React.FC<{ product: Product; onQuickView: (p: Product) => voi
         endDate: new Date(Date.now() + 4*86400000).toLocaleDateString(),
         type: 'rent'
     });
-    alert("Added to bag!");
+    toast("Added to bag!", 'success');
   };
 
   return (

@@ -1,41 +1,54 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { adminAPI, userAPI } from '../../services/api';
+import { useToast } from '../../components/ToastProvider';
+import CustomSelect from '../../components/CustomSelect';
+import ConfirmModal from '../../components/ConfirmModal';
+import Modal from '../../components/Modal';
 
 const AdminUsers: React.FC<{ users?: any[] }> = ({ users = [] }) => {
-  const { updateUserStatus, updateUserRole, approveVerification, rejectVerification, updateWallet } = useAuth();
+  const { updateUserStatus, updateUserRole, approveVerification, rejectVerification, updateWallet, refreshUserFromBackend } = useAuth();
   const [filter, setFilter] = useState<'all' | 'active' | 'partners'>('all');
   const [selected, setSelected] = useState<any | null>(null);
 
   const handleRoleMenu = (user: any) => {
-    // simple inline role change prompt
-    const choice = prompt(`Change role for ${user.name} (enter: User / Partner / Admin)`);
-    if (!choice) return;
-    const normalized = choice.trim();
-    if (!['User', 'Partner', 'Admin'].includes(normalized)) {
-      alert('Invalid role. Use User, Partner, or Admin.');
-      return;
-    }
-    if (!updateUserRole) return;
-    if (!confirm(`Change role of ${user.name} to ${normalized}?`)) return;
-    updateUserRole(user.id, normalized as any);
-    alert(`${user.name} is now ${normalized}`);
+    // open role selection modal
+    setRoleTarget(user);
+    setRoleCandidate(user.role || 'User');
+    setRoleModalOpen(true);
   };
 
   const handleApprove = (user: any) => {
     if (!approveVerification) return;
-    if (!confirm(`Approve verification for ${user.name}?`)) return;
-    approveVerification(user.id);
-    alert(`${user.name} approved.`);
-    setSelected(null);
+    setConfirmPayload({
+      title: 'Approve Verification',
+      message: `Approve verification for ${user.name}?`,
+      danger: false,
+      onConfirm: async () => {
+        // optimistic
+        const prevStatus = user.verificationStatus;
+        approveVerification && approveVerification(user.id);
+        toast(`${user.name} approved.`, 'success');
+        try {
+          await userAPI.approveVerification(parseInt(user.id));
+          setSelected(null);
+        } catch (err: any) {
+          console.error(err);
+          toast('Failed to approve verification. Reverting.', 'error');
+          // rollback to authoritative backend state
+          await refreshUserFromBackend(user.id);
+        }
+        setConfirmOpen(false);
+      }
+    });
+    setConfirmOpen(true);
   };
 
   const handleReject = (user: any) => {
     if (!rejectVerification) return;
-    const reason = prompt('Provide rejection reason:') || 'Invalid documents';
-    if (!confirm(`Reject verification for ${user.name}?`)) return;
-    rejectVerification(user.id, reason);
-    alert(`${user.name} rejected.`);
-    setSelected(null);
+    setRejectTarget(user);
+    setRejectReason('Invalid documents');
+    setRejectModalOpen(true);
   };
 
   const handleChangeRole = (user: any) => {
@@ -44,22 +57,10 @@ const AdminUsers: React.FC<{ users?: any[] }> = ({ users = [] }) => {
 
   const handleAdjustWallet = async (user: any) => {
     if (!updateWallet) return;
-    const amtStr = prompt('Enter amount to add (positive) or deduct (negative) e.g. 5000 or -2000');
-    if (!amtStr) return;
-    const amount = Number(amtStr);
-    if (isNaN(amount) || amount === 0) {
-      alert('Invalid amount');
-      return;
-    }
-    const reason = prompt('Reason for adjustment:') || 'Admin adjustment';
-    try {
-      await updateWallet(user.id, amount, reason);
-      alert('Wallet updated.');
-      setSelected(null);
-    } catch (err) {
-      console.error(err);
-      alert('Failed to update wallet.');
-    }
+    setWalletTarget(user);
+    setWalletAmount('');
+    setWalletReason('Admin adjustment');
+    setWalletModalOpen(true);
   };
 
   const visible = users.filter(u => {
@@ -72,16 +73,53 @@ const AdminUsers: React.FC<{ users?: any[] }> = ({ users = [] }) => {
   const toggleStatus = (user: any) => {
     if (!updateUserStatus) return;
     if (user.status === 'Active') {
-      const reason = prompt(`Suspend ${user.name}? Provide a reason:`) || 'No reason provided';
-      if (!confirm(`Confirm suspend ${user.name}?`)) return;
-      updateUserStatus(user.id, 'Suspended', reason);
-      alert(`${user.name} suspended.`);
-    } else {
-      if (!confirm(`Reactivate ${user.name}?`)) return;
-      updateUserStatus(user.id, 'Active');
-      alert(`${user.name} reactivated.`);
+      setSuspendTarget(user);
+      setSuspendReason('No reason provided');
+      setSuspendModalOpen(true);
+      return;
     }
+
+    // Reactivate user via admin endpoint
+    setConfirmPayload({
+      title: 'Reactivate User',
+      message: `Reactivate ${user.name}?`,
+      onConfirm: async () => {
+        try {
+          await adminAPI.updateUser(parseInt(user.id), { status: 'Active' });
+          updateUserStatus(user.id, 'Active');
+          toast(`${user.name} reactivated.`, 'success');
+        } catch (err: any) {
+          console.error(err);
+          toast('Failed to reactivate user.', 'error');
+        }
+        setConfirmOpen(false);
+      }
+    });
+    setConfirmOpen(true);
   };
+
+  const toast = useToast();
+
+  // modal states
+  const [roleModalOpen, setRoleModalOpen] = useState(false);
+  const [roleTarget, setRoleTarget] = useState<any | null>(null);
+  const [roleCandidate, setRoleCandidate] = useState<string>('User');
+
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
+  const [walletTarget, setWalletTarget] = useState<any | null>(null);
+  const [walletAmount, setWalletAmount] = useState<string>('');
+  const [walletReason, setWalletReason] = useState<string>('');
+
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectTarget, setRejectTarget] = useState<any | null>(null);
+  const [rejectReason, setRejectReason] = useState<string>('');
+
+  const [suspendModalOpen, setSuspendModalOpen] = useState(false);
+  const [suspendTarget, setSuspendTarget] = useState<any | null>(null);
+  const [suspendReason, setSuspendReason] = useState<string>('');
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmPayload, setConfirmPayload] = useState<any | null>(null);
 
   return (
     <div className="bg-[#1f0c05] border border-white/10 rounded-sm p-4">
@@ -108,13 +146,9 @@ const AdminUsers: React.FC<{ users?: any[] }> = ({ users = [] }) => {
               </div>
 
               <div className="flex items-center gap-2">
-                <button onClick={() => toggleStatus(u)} className={`text-xs px-3 py-1 rounded ${u.status === 'Active' ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`}>
-                  {u.status === 'Active' ? 'Suspend' : 'Activate'}
-                </button>
+                <button onClick={() => toggleStatus(u)} className={`text-xs px-3 py-1 rounded ${u.status === 'Active' ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`}>{u.status === 'Active' ? 'Suspend' : 'Activate'}</button>
                 <button onClick={() => setSelected(u)} className="text-xs px-3 py-1 rounded bg-white/5 hover:bg-white/10 text-cream">Details</button>
-                <div className="relative">
-                  <button onClick={() => handleRoleMenu(u)} className="text-xs px-3 py-1 rounded bg-white/5 hover:bg-white/10 text-cream">Role</button>
-                </div>
+                <button onClick={() => handleRoleMenu(u)} className="text-xs px-3 py-1 rounded bg-white/5 hover:bg-white/10 text-cream">Role</button>
               </div>
             </div>
           ))
@@ -171,6 +205,123 @@ const AdminUsers: React.FC<{ users?: any[] }> = ({ users = [] }) => {
             </div>
           </div>
         </div>
+      )}
+      {/* Role modal */}
+      <Modal open={roleModalOpen} title={`Change role for ${roleTarget?.name || ''}`} onClose={() => setRoleModalOpen(false)} footer={
+        <div className="flex justify-end gap-2">
+          <button onClick={() => setRoleModalOpen(false)} className="px-3 py-1 rounded text-cream/60 hover:text-golden-orange">Cancel</button>
+          <button onClick={async () => {
+            if (!roleTarget) return;
+            // optimistic
+            const prevRole = roleTarget.role;
+            updateUserRole && updateUserRole(roleTarget.id, roleCandidate as any);
+            toast(`${roleTarget.name} is now ${roleCandidate}`, 'success');
+            try {
+              await adminAPI.updateUser(parseInt(roleTarget.id), { role: roleCandidate });
+              setRoleModalOpen(false);
+            } catch (err: any) {
+              console.error(err);
+              toast('Failed to change role. Reverting.', 'error');
+              await refreshUserFromBackend(roleTarget.id);
+            }
+          }} className="px-3 py-1 rounded bg-golden-orange text-espresso">Save</button>
+        </div>
+      }>
+        <div className="space-y-2">
+          <label className="text-cream/70 text-xs">Select role</label>
+          <CustomSelect
+            options={[ 'User', 'Partner', 'Admin' ]}
+            value={roleCandidate}
+            onChange={(v) => setRoleCandidate(v)}
+          />
+        </div>
+      </Modal>
+
+      {/* Wallet modal */}
+      <Modal open={walletModalOpen} title={walletTarget ? `Adjust wallet for ${walletTarget.name}` : 'Adjust wallet'} onClose={() => setWalletModalOpen(false)} footer={
+        <div className="flex justify-end gap-2">
+          <button onClick={() => setWalletModalOpen(false)} className="px-3 py-1 rounded text-cream/60 hover:text-golden-orange">Cancel</button>
+          <button onClick={async () => {
+            if (!updateWallet || !walletTarget) return;
+            const amount = Number(walletAmount);
+            if (isNaN(amount) || amount === 0) {
+              toast('Invalid amount', 'error');
+              return;
+            }
+            try {
+              await updateWallet(walletTarget.id, amount, walletReason);
+              toast('Wallet updated.', 'success');
+              setWalletModalOpen(false);
+              setSelected(null);
+            } catch (err) {
+              console.error(err);
+              toast('Failed to update wallet.', 'error');
+            }
+          }} className="px-3 py-1 rounded bg-golden-orange text-espresso">Apply</button>
+        </div>
+      }>
+        <div className="space-y-3">
+          <label className="text-cream/70 text-xs">Amount (positive to credit, negative to debit)</label>
+          <input value={walletAmount} onChange={e => setWalletAmount(e.target.value)} className="w-full p-2 rounded bg-black/10 text-cream border border-white/5" />
+          <label className="text-cream/70 text-xs">Reason</label>
+          <input value={walletReason} onChange={e => setWalletReason(e.target.value)} className="w-full p-2 rounded bg-black/10 text-cream border border-white/5" />
+        </div>
+      </Modal>
+
+      {/* Reject modal */}
+      <Modal open={rejectModalOpen} title={`Reject verification for ${rejectTarget?.name || ''}`} onClose={() => setRejectModalOpen(false)} footer={
+        <div className="flex justify-end gap-2">
+          <button onClick={() => setRejectModalOpen(false)} className="px-3 py-1 rounded text-cream/60 hover:text-golden-orange">Cancel</button>
+          <button onClick={async () => {
+            if (!rejectVerification || !rejectTarget) return;
+            try {
+              await userAPI.rejectVerification(parseInt(rejectTarget.id), rejectReason);
+              rejectVerification(rejectTarget.id, rejectReason);
+              toast(`${rejectTarget.name} rejected.`, 'info');
+              setRejectModalOpen(false);
+              setSelected(null);
+            } catch (err: any) {
+              console.error(err);
+              toast('Failed to reject verification.', 'error');
+            }
+          }} className="px-3 py-1 rounded bg-red-600 text-white">Reject</button>
+        </div>
+      }>
+        <div className="space-y-2">
+          <label className="text-cream/70 text-xs">Reason</label>
+          <textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)} className="w-full p-2 rounded bg-black/10 text-cream border border-white/5" />
+        </div>
+      </Modal>
+
+      {/* Suspend modal */}
+      <Modal open={suspendModalOpen} title={`Suspend ${suspendTarget?.name || ''}`} onClose={() => setSuspendModalOpen(false)} footer={
+        <div className="flex justify-end gap-2">
+          <button onClick={() => setSuspendModalOpen(false)} className="px-3 py-1 rounded text-cream/60 hover:text-golden-orange">Cancel</button>
+          <button onClick={async () => {
+            if (!suspendTarget) return;
+            // optimistic
+            updateUserStatus && updateUserStatus(suspendTarget.id, 'Suspended', suspendReason);
+            toast(`${suspendTarget.name} suspended.`, 'info');
+            try {
+              await adminAPI.updateUser(parseInt(suspendTarget.id), { status: 'Suspended', reason: suspendReason });
+              setSuspendModalOpen(false);
+            } catch (err: any) {
+              console.error(err);
+              toast('Failed to suspend user. Reverting.', 'error');
+              await refreshUserFromBackend(suspendTarget.id);
+            }
+          }} className="px-3 py-1 rounded bg-red-600 text-white">Suspend</button>
+        </div>
+      }>
+        <div className="space-y-2">
+          <label className="text-cream/70 text-xs">Reason</label>
+          <textarea value={suspendReason} onChange={e => setSuspendReason(e.target.value)} className="w-full p-2 rounded bg-black/10 text-cream border border-white/5" />
+        </div>
+      </Modal>
+
+      {/* Generic confirm modal */}
+      {confirmPayload && (
+        <ConfirmModal open={confirmOpen} title={confirmPayload.title} message={confirmPayload.message} danger={confirmPayload.danger} onConfirm={confirmPayload.onConfirm} onCancel={() => setConfirmOpen(false)} />
       )}
     </div>
   );

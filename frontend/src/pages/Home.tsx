@@ -5,6 +5,7 @@ import { ShieldCheck, Truck, Sparkles, Diamond, ShoppingBag, DollarSign, Star, B
 import { useCart } from '../context/CartContext';
 import { useProduct } from '../context/ProductContext';
 import { Product } from '../types';
+import { useToast } from '../components/ToastProvider';
 
 
 
@@ -12,6 +13,7 @@ import { Product } from '../types';
 export const Home: React.FC = () => {
   const { products } = useProduct();
   const { addToCart } = useCart();
+   const toast = useToast();
 
   // --- Hero Slider Logic ---
   const heroImages = [
@@ -49,7 +51,7 @@ export const Home: React.FC = () => {
     const endDate = new Date();
     endDate.setDate(today.getDate() + 4);
     
-    addToCart({
+   addToCart({
         id: `${product.id}-${Date.now()}`,
         product: product,
         selectedSize: product.availableSizes[0] || 'One Size',
@@ -58,7 +60,7 @@ export const Home: React.FC = () => {
         startDate: today.toLocaleDateString(),
         endDate: endDate.toLocaleDateString()
     });
-    alert(`${product.name} added to your bag.`);
+      toast(`${product.name} added to your bag.`, 'success');
   };
 
   return (
@@ -297,7 +299,7 @@ export const Home: React.FC = () => {
             </div>
 
             <div className="bg-white/5 border border-golden-orange/20 rounded-xl p-8 md:p-12 backdrop-blur-sm hover:border-golden-orange/40 transition-all duration-300">
-               <form onSubmit={(e) => { e.preventDefault(); alert('Thank you for subscribing!'); (e.target as HTMLFormElement).reset(); }} className="flex flex-col sm:flex-row gap-4">
+               <form onSubmit={(e) => { e.preventDefault(); toast('Thank you for subscribing!', 'success'); (e.target as HTMLFormElement).reset(); }} className="flex flex-col sm:flex-row gap-4">
                   <input 
                      type="email" 
                      placeholder="Enter your email address" 

@@ -16,12 +16,16 @@ import AdminSidebar from './AdminSidebar';
 import AdminUsers from './AdminUsers';
 import { inventoryItems, financialRecords, verificationRequests, activityLogs, settingsDefaults } from './adminData';
 import { useEffect } from 'react';
+import { useToast } from '../../components/ToastProvider';
+import Modal from '../../components/Modal';
+import ConfirmModal from '../../components/ConfirmModal';
+import { adminAPI, userAPI, productAPI } from '../../services/api';
 
 export const AdminDashboard: React.FC = () => {
         const [activeTab, setActiveTab] = useState<'users' | 'rentals' | 'inventory' | 'marketing' | 'verifications' | 'global_activity' | 'financials' | 'analytics'>('analytics');
         const [sidebarOpen, setSidebarOpen] = useState(false);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState<{ url: string, title: string } | null>(null);
+    const [selectedDoc, setSelectedDoc] = useState<{ url: string, title: string, body?: string } | null>(null);
   const [showAddStockModal, setShowAddStockModal] = useState(false);
   const [userFilter, setUserFilter] = useState<'All' | 'User' | 'Partner'>('All');
   
@@ -50,6 +54,25 @@ export const AdminDashboard: React.FC = () => {
   const orders = contextOrders || [];
   
   const navigate = useNavigate();
+
+    const toast = useToast();
+
+    // modal & confirm state
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [confirmPayload, setConfirmPayload] = useState<any | null>(null);
+
+    const [rejectModalOpen, setRejectModalOpen] = useState(false);
+    const [rejectTarget, setRejectTarget] = useState<any | null>(null);
+    const [rejectReason, setRejectReason] = useState<string>('');
+
+    const [suspendModalOpen, setSuspendModalOpen] = useState(false);
+    const [suspendTarget, setSuspendTarget] = useState<any | null>(null);
+    const [suspendReason, setSuspendReason] = useState<string>('');
+
+    const [productRejectModalOpen, setProductRejectModalOpen] = useState(false);
+    const [productRejectTarget, setProductRejectTarget] = useState<any | null>(null);
+    const [productRejectField, setProductRejectField] = useState<string>('');
+    const [productRejectReason, setProductRejectReason] = useState<string>('');
 
   const pendingVerifications = registeredUsers.filter(u => u && u.verificationStatus === 'Pending');
 
@@ -114,37 +137,93 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleSuspendToggle = (userId: string, currentStatus: string) => {
-      const newStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
-      const reason = newStatus === 'Suspended' ? prompt("Enter reason for suspension:") : undefined;
-      if (newStatus === 'Suspended' && !reason) return; // Cancel if no reason provided
-      
-      if (updateUserStatus) updateUserStatus(userId, newStatus, reason || undefined);
+            const newStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
+            if (newStatus === 'Suspended') {
+                    setSuspendTarget({ id: userId });
+                    setSuspendReason('No reason provided');
+                    setSuspendModalOpen(true);
+                    return;
+            }
+            // reactivate path
+            setConfirmPayload({
+                title: 'Reactivate User',
+                message: `Reactivate user?`,
+                        onConfirm: async () => {
+                                        try {
+                                            await adminAPI.updateUser(parseInt(userId), { status: 'Active' });
+                                            updateUserStatus && updateUserStatus(userId, 'Active');
+                                            toast('User reactivated.', 'success');
+                                        } catch (err: any) {
+                                            console.error(err);
+                                            toast('Failed to reactivate user.', 'error');
+                                        }
+                                        setConfirmOpen(false);
+                                }
+            });
+            setConfirmOpen(true);
   };
 
   const handleDeleteUser = (userId: string) => {
-      if(confirm("Are you sure you want to PERMANENTLY DELETE this user? This action cannot be undone.")) {
-          if (deleteUser) deleteUser(userId);
-      }
+            setConfirmPayload({
+                title: 'Delete User',
+                message: "Are you sure you want to PERMANENTLY DELETE this user? This action cannot be undone.",
+                danger: true,
+                                onConfirm: () => {
+                                        (async () => {
+                                            try {
+                                                await userAPI.delete(parseInt(userId));
+                                                deleteUser && deleteUser(userId);
+                                                toast('User deleted.', 'info');
+                                            } catch (err: any) {
+                                                console.error(err);
+                                                toast('Failed to delete user.', 'error');
+                                            }
+                                            setConfirmOpen(false);
+                                        })();
+                                }
+            });
+            setConfirmOpen(true);
   };
   
   const handleApprove = (userId: string, userName: string) => {
-      if(confirm(`Approve verification for ${userName}?`)) {
-        if (approveVerification) approveVerification(userId);
-      }
+            setConfirmPayload({
+                title: 'Approve Verification',
+                message: `Approve verification for ${userName}?`,
+                                onConfirm: () => {
+                                        (async () => {
+                                            try {
+                                                await userAPI.approveVerification(parseInt(userId));
+                                                approveVerification && approveVerification(userId);
+                                                toast(`${userName} approved.`, 'success');
+                                            } catch (err: any) {
+                                                console.error(err);
+                                                toast('Failed to approve verification.', 'error');
+                                            }
+                                            setConfirmOpen(false);
+                                        })();
+                                }
+            });
+            setConfirmOpen(true);
   };
 
   const handleReject = (userId: string) => {
-      const reason = prompt("Please provide a reason for rejection (this will be sent to the user):", "Document ID number did not match upload.");
-      if (reason) {
-          if (rejectVerification) rejectVerification(userId, reason);
-          alert("User rejected and notified.");
-      }
+      setRejectTarget({ id: userId });
+      setRejectReason('Document ID number did not match upload.');
+      setRejectModalOpen(true);
   };
 
   const handleManualVerify = (userId: string, userName: string) => {
-      if(confirm(`FORCE VERIFY: Are you sure you want to manually verify ${userName} without waiting for document submission?`)) {
-          if (approveVerification) approveVerification(userId);
-      }
+            setConfirmPayload({
+                title: 'Force Verify',
+                message: `FORCE VERIFY: Are you sure you want to manually verify ${userName} without waiting for document submission?`,
+                danger: false,
+                onConfirm: () => {
+                    if (approveVerification) approveVerification(userId);
+                    toast(`${userName} force-verified.`, 'success');
+                    setConfirmOpen(false);
+                }
+            });
+            setConfirmOpen(true);
   }
 
   // ESV SYSTEM (Export Save View)
@@ -175,22 +254,52 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleDeleteProduct = (id: string) => {
-      if(confirm("Are you sure you want to delete this product from the global inventory?")) {
-          if (removeProduct) removeProduct(id);
-      }
+            setConfirmPayload({
+                title: 'Delete Product',
+                message: 'Are you sure you want to delete this product from the global inventory?',
+                danger: true,
+                                onConfirm: () => {
+                                        (async () => {
+                                            try {
+                                                await productAPI.delete(id);
+                                                removeProduct && removeProduct(id);
+                                                toast('Product removed from inventory.', 'info');
+                                            } catch (err: any) {
+                                                console.error(err);
+                                                toast('Failed to remove product.', 'error');
+                                            }
+                                            setConfirmOpen(false);
+                                        })();
+                                }
+            });
+            setConfirmOpen(true);
   };
   
   const handleForceStatus = (orderId: string, itemId: string, status: any) => {
-      if(confirm(`Are you sure you want to FORCE update this transaction to '${status}'? This overrides partner control.`)) {
-          if (updateOrderItemStatus) updateOrderItemStatus(orderId, itemId, status);
-      }
+            setConfirmPayload({
+                title: 'Force Update Transaction',
+                message: `Are you sure you want to FORCE update this transaction to '${status}'? This overrides partner control.`,
+                danger: false,
+                onConfirm: () => {
+                    if (updateOrderItemStatus) updateOrderItemStatus(orderId, itemId, status);
+                    toast('Transaction status updated.', 'success');
+                    setConfirmOpen(false);
+                }
+            });
+            setConfirmOpen(true);
   };
   
   const handleProcessWithdrawal = (txId: string) => {
-      if(confirm("Confirm that you have transferred funds to the partner's bank account?")) {
-          if (processWithdrawal) processWithdrawal(txId);
-          alert("Withdrawal marked as completed.");
-      }
+            setConfirmPayload({
+                title: 'Confirm Withdrawal',
+                message: "Confirm that you have transferred funds to the partner's bank account?",
+                onConfirm: () => {
+                    if (processWithdrawal) processWithdrawal(txId);
+                    toast('Withdrawal marked as completed.', 'success');
+                    setConfirmOpen(false);
+                }
+            });
+            setConfirmOpen(true);
   }
 
   const handleAddStockSubmit = (e: React.FormEvent) => {
@@ -218,7 +327,7 @@ export const AdminDashboard: React.FC = () => {
     setShowAddStockModal(false);
     setNewItem({ name: '', brand: '', category: Category.WOMEN, rentalPrice: 0, retailPrice: 0, buyPrice: 0, isForSale: false, description: '', availableSizes: [], images: [], color: '', occasion: '', autoSellAfterRentals: 0 });
     setSizeInput('');
-    alert("Item added to global inventory.");
+        toast('Item added to global inventory.', 'success');
   };
 
     // local admin-data state for demo purposes
@@ -277,12 +386,12 @@ export const AdminDashboard: React.FC = () => {
                   <h1 className="font-serif text-4xl text-cream mt-2">Executive Dashboard</h1>
                   <p className="text-golden-orange text-xs uppercase tracking-widest mt-1">Admin Control Panel</p>
               </div>
-                            <div className="flex gap-2 flex-wrap mt-4 md:mt-0 items-center">
-                                <div className="flex items-center gap-2">
+                            {/* <div className="flex gap-2 flex-wrap mt-4 md:mt-0 items-center"> */}
+                                {/* <div className="flex items-center gap-2">
                                     <button onClick={() => setSidebarOpen(s => !s)} className="p-2 bg-black/20 rounded text-cream/90" title="Toggle menu"><Menu size={16} /></button>
-                                </div>
+                                </div> */}
                                 {/* Controls moved to sidebar per request - header left intentionally minimal */}
-                            </div>
+                            {/* </div> */}
           </div>
 
                     {/* Mobile tab nav (visible on small screens) */}
@@ -372,19 +481,26 @@ export const AdminDashboard: React.FC = () => {
                                                    <button onClick={() => {
                                                        if (updateOrderItemStatus) {
                                                            updateOrderItemStatus(order.id, item.id, 'Accepted');
-                                                           alert("Forced accepted.");
+                                                           toast('Forced accepted.', 'success');
                                                        }
                                                    }} className="p-1 hover:text-green-400 border border-white/10 rounded" title="Force Accept"><CheckCircle size={14}/></button>
-                                                    
+                                                     
                                                    <button onClick={() => {
-                                                       if(confirm("Force Decline? This will refund the user.")) {
-                                                           if (updateOrderItemStatus && updateWallet) {
-                                                               updateOrderItemStatus(order.id, item.id, 'Rejected');
-                                                               // Admin refund trigger
-                                                               updateWallet(order.userId, item.price, `Refund: Admin Declined - ${item.product.name}`, 'Credit');
-                                                               alert("Forced declined & user refunded.");
+                                                       setConfirmPayload({
+                                                           title: 'Force Decline',
+                                                           message: 'Force Decline? This will refund the user.',
+                                                           danger: true,
+                                                           onConfirm: () => {
+                                                               if (updateOrderItemStatus && updateWallet) {
+                                                                   updateOrderItemStatus(order.id, item.id, 'Rejected');
+                                                                   // Admin refund trigger
+                                                                   updateWallet(order.userId, item.price, `Refund: Admin Declined - ${item.product.name}`, 'Credit');
+                                                                   toast('Forced declined & user refunded.', 'info');
+                                                               }
+                                                               setConfirmOpen(false);
                                                            }
-                                                       }
+                                                       });
+                                                       setConfirmOpen(true);
                                                    }} className="p-1 hover:text-red-400 border border-white/10 rounded" title="Force Decline"><XCircle size={14}/></button>
                                                </div>
                                            )}
@@ -547,14 +663,22 @@ export const AdminDashboard: React.FC = () => {
                                                     <p className="text-cream/60 text-xs">Images</p>
                                                     <p className="text-cream font-bold">{p.approval?.images || 'Pending'}</p>
                                                     <div className="flex gap-2 mt-2">
+                                                                                                                <button onClick={async () => {
+                                                                                                                        if (!updateProduct) return;
+                                                                                                                        try {
+                                                                                                                            const updated = await adminAPI.updateProduct(p.id, { approval: { ...(p.approval || {}), images: 'Approved', status: (p.approval && p.approval.price === 'Approved' && p.approval.description === 'Approved') ? 'Approved' : 'Pending' } });
+                                                                                                                            updateProduct && updateProduct(p.id, updated);
+                                                                                                                            toast('Product images approved.', 'success');
+                                                                                                                        } catch (err: any) {
+                                                                                                                            console.error(err);
+                                                                                                                            toast('Failed to approve images.', 'error');
+                                                                                                                        }
+                                                                                                                }} className="px-2 py-1 rounded bg-green-600 text-cream text-xs">Approve</button>
                                                         <button onClick={() => {
-                                                            if (!updateProduct) return;
-                                                            updateProduct(p.id, { approval: { ...(p.approval || {}), images: 'Approved', status: (p.approval && p.approval.price === 'Approved' && p.approval.description === 'Approved') ? 'Approved' : 'Pending' } });
-                                                        }} className="px-2 py-1 rounded bg-green-600 text-cream text-xs">Approve</button>
-                                                        <button onClick={() => {
-                                                            const reason = prompt('Reason for rejecting images:') || 'Rejected by admin';
-                                                            if (!updateProduct) return;
-                                                            updateProduct(p.id, { approval: { ...(p.approval || {}), images: 'Rejected', status: 'Rejected', notes: reason } });
+                                                            setProductRejectTarget(p);
+                                                            setProductRejectField('images');
+                                                            setProductRejectReason('Rejected by admin');
+                                                            setProductRejectModalOpen(true);
                                                         }} className="px-2 py-1 rounded bg-red-600 text-cream text-xs">Reject</button>
                                                     </div>
                                                 </div>
@@ -563,14 +687,22 @@ export const AdminDashboard: React.FC = () => {
                                                     <p className="text-cream/60 text-xs">Price</p>
                                                     <p className="text-cream font-bold">₦{(p.rentalPrice || 0).toLocaleString()}</p>
                                                     <div className="flex gap-2 mt-2">
+                                                                                                                <button onClick={async () => {
+                                                                                                                        if (!updateProduct) return;
+                                                                                                                        try {
+                                                                                                                            const updated = await adminAPI.updateProduct(p.id, { approval: { ...(p.approval || {}), price: 'Approved', status: (p.approval && p.approval.images === 'Approved' && p.approval.description === 'Approved') ? 'Approved' : 'Pending' } });
+                                                                                                                            updateProduct && updateProduct(p.id, updated);
+                                                                                                                            toast('Product price approved.', 'success');
+                                                                                                                        } catch (err: any) {
+                                                                                                                            console.error(err);
+                                                                                                                            toast('Failed to approve price.', 'error');
+                                                                                                                        }
+                                                                                                                }} className="px-2 py-1 rounded bg-green-600 text-cream text-xs">Approve</button>
                                                         <button onClick={() => {
-                                                            if (!updateProduct) return;
-                                                            updateProduct(p.id, { approval: { ...(p.approval || {}), price: 'Approved', status: (p.approval && p.approval.images === 'Approved' && p.approval.description === 'Approved') ? 'Approved' : 'Pending' } });
-                                                        }} className="px-2 py-1 rounded bg-green-600 text-cream text-xs">Approve</button>
-                                                        <button onClick={() => {
-                                                            const reason = prompt('Reason for rejecting price:') || 'Price too high';
-                                                            if (!updateProduct) return;
-                                                            updateProduct(p.id, { approval: { ...(p.approval || {}), price: 'Rejected', status: 'Rejected', notes: reason } });
+                                                            setProductRejectTarget(p);
+                                                            setProductRejectField('price');
+                                                            setProductRejectReason('Price too high');
+                                                            setProductRejectModalOpen(true);
                                                         }} className="px-2 py-1 rounded bg-red-600 text-cream text-xs">Reject</button>
                                                     </div>
                                                 </div>
@@ -579,32 +711,47 @@ export const AdminDashboard: React.FC = () => {
                                                     <p className="text-cream/60 text-xs">Description</p>
                                                     <p className="text-cream text-sm line-clamp-3">{p.description}</p>
                                                     <div className="flex gap-2 mt-2">
+                                                                                                                <button onClick={async () => {
+                                                                                                                        if (!updateProduct) return;
+                                                                                                                        try {
+                                                                                                                            const updated = await adminAPI.updateProduct(p.id, { approval: { ...(p.approval || {}), description: 'Approved', status: (p.approval && p.approval.images === 'Approved' && p.approval.price === 'Approved') ? 'Approved' : 'Pending' } });
+                                                                                                                            updateProduct && updateProduct(p.id, updated);
+                                                                                                                            toast('Product description approved.', 'success');
+                                                                                                                        } catch (err: any) {
+                                                                                                                            console.error(err);
+                                                                                                                            toast('Failed to approve description.', 'error');
+                                                                                                                        }
+                                                                                                                }} className="px-2 py-1 rounded bg-green-600 text-cream text-xs">Approve</button>
                                                         <button onClick={() => {
-                                                            if (!updateProduct) return;
-                                                            updateProduct(p.id, { approval: { ...(p.approval || {}), description: 'Approved', status: (p.approval && p.approval.images === 'Approved' && p.approval.price === 'Approved') ? 'Approved' : 'Pending' } });
-                                                        }} className="px-2 py-1 rounded bg-green-600 text-cream text-xs">Approve</button>
-                                                        <button onClick={() => {
-                                                            const reason = prompt('Reason for rejecting description:') || 'Description unclear';
-                                                            if (!updateProduct) return;
-                                                            updateProduct(p.id, { approval: { ...(p.approval || {}), description: 'Rejected', status: 'Rejected', notes: reason } });
+                                                            setProductRejectTarget(p);
+                                                            setProductRejectField('description');
+                                                            setProductRejectReason('Description unclear');
+                                                            setProductRejectModalOpen(true);
                                                         }} className="px-2 py-1 rounded bg-red-600 text-cream text-xs">Reject</button>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <div className="mt-3 flex gap-2">
-                                                <button onClick={() => {
-                                                    if (!updateProduct) return;
-                                                    updateProduct(p.id, { approval: { images: 'Approved', price: 'Approved', description: 'Approved', status: 'Approved' } });
-                                                    setLocalActivity(prev => [{ id: 'a' + Date.now(), date: new Date().toISOString(), actor: 'Admin', action: `Approved product ${p.name}`, details: p.id }, ...prev]);
-                                                    alert('Product fully approved and will appear in collections.');
-                                                }} className="px-3 py-2 bg-golden-orange text-espresso rounded">Approve All</button>
+                                                                                                <button onClick={async () => {
+                                                                                                        if (!updateProduct) return;
+                                                                                                        try {
+                                                                                                            const updated = await adminAPI.updateProduct(p.id, { approval: { images: 'Approved', price: 'Approved', description: 'Approved', status: 'Approved' } });
+                                                                                                            updateProduct && updateProduct(p.id, updated);
+                                                                                                            setLocalActivity(prev => [{ id: 'a' + Date.now(), date: new Date().toISOString(), actor: 'Admin', action: `Approved product ${p.name}`, details: p.id }, ...prev]);
+                                                                                                            toast('Product fully approved and will appear in collections.', 'success');
+                                                                                                        } catch (err: any) {
+                                                                                                            console.error(err);
+                                                                                                            toast('Failed to approve product.', 'error');
+                                                                                                        }
+                                                                                                }} className="px-3 py-2 bg-golden-orange text-espresso rounded">Approve All</button>
 
                                                 <button onClick={() => {
                                                     if (!updateProduct) return;
-                                                    const reason = prompt('Reason for rejecting product entirely:') || 'Rejected by admin';
-                                                    updateProduct(p.id, { approval: { images: 'Rejected', price: 'Rejected', description: 'Rejected', status: 'Rejected', notes: reason } });
-                                                    setLocalActivity(prev => [{ id: 'a' + Date.now(), date: new Date().toISOString(), actor: 'Admin', action: `Rejected product ${p.name}`, details: reason }, ...prev]);
+                                                    setProductRejectTarget(p);
+                                                    setProductRejectField('product');
+                                                    setProductRejectReason('Rejected by admin');
+                                                    setProductRejectModalOpen(true);
                                                 }} className="px-3 py-2 bg-red-600 text-cream rounded">Reject Product</button>
                                             </div>
                                         </div>
@@ -684,10 +831,17 @@ export const AdminDashboard: React.FC = () => {
                                                 <td className="py-2 text-cream/60">{it.owner}</td>
                                                 <td className="py-2 text-cream/60">
                                                     <button onClick={() => {
-                                                        if(confirm('Delete this inventory item?')) {
-                                                            setLocalInventory(prev => prev.filter(p => p.id !== it.id));
-                                                            setLocalActivity(prev => [{ id: 'a' + Date.now(), date: new Date().toISOString(), actor: 'Admin', action: `Deleted inventory ${it.name}`, details: it.id }, ...prev]);
-                                                        }
+                                                        setConfirmPayload({
+                                                            title: 'Delete Inventory Item',
+                                                            message: `Delete inventory item ${it.name}?`,
+                                                            danger: true,
+                                                            onConfirm: () => {
+                                                                setLocalInventory(prev => prev.filter(p => p.id !== it.id));
+                                                                setLocalActivity(prev => [{ id: 'a' + Date.now(), date: new Date().toISOString(), actor: 'Admin', action: `Deleted inventory ${it.name}`, details: it.id }, ...prev]);
+                                                                setConfirmOpen(false);
+                                                            }
+                                                        });
+                                                        setConfirmOpen(true);
                                                     }} className="text-xs px-2 py-1 rounded bg-red-600 text-cream">Delete</button>
                                                 </td>
                                             </tr>
@@ -719,14 +873,13 @@ export const AdminDashboard: React.FC = () => {
                                                         setLocalActivity(prev => [{ id: 'a' + Date.now(), date: new Date().toISOString(), actor: 'Admin', action: `Approved verification ${v.name}` , details: v.id}, ...prev]);
                                                     }} className="px-3 py-1 rounded bg-green-600 text-cream text-xs">Approve</button>
                                                     <button onClick={() => {
-                                                        const reason = prompt('Reason for rejection:') || 'Rejected by admin';
-                                                        if (rejectVerification) rejectVerification(v.userId || v.id, reason);
-                                                        setLocalVerifications(prev => prev.map(x => x.id === v.id ? { ...x, status: 'Rejected', notes: reason } : x));
-                                                        setLocalActivity(prev => [{ id: 'a' + Date.now(), date: new Date().toISOString(), actor: 'Admin', action: `Rejected verification ${v.name}` , details: reason}, ...prev]);
+                                                        setRejectTarget({ id: v.userId || v.id, name: v.name });
+                                                        setRejectReason('Rejected by admin');
+                                                        setRejectModalOpen(true);
                                                     }} className="px-3 py-1 rounded bg-red-600 text-cream text-xs">Reject</button>
                                                 </>
                                             )}
-                                            <button onClick={() => alert(JSON.stringify(v, null, 2))} className="px-3 py-1 rounded bg-white/5 text-cream text-xs">View</button>
+                                            <button onClick={() => setSelectedDoc({ url: '', title: v.name + ' — details', body: JSON.stringify(v, null, 2) })} className="px-3 py-1 rounded bg-white/5 text-cream text-xs">View</button>
                                         </div>
                                     </div>
                                 ))}
@@ -800,12 +953,90 @@ export const AdminDashboard: React.FC = () => {
                                     <input type="number" value={settings.itemsPerPage} onChange={e => setSettings(s => ({ ...s, itemsPerPage: Number(e.target.value) }))} className="w-full mt-1 p-2 bg-black/20 border border-white/5 rounded text-cream" />
                                 </div>
                             </div>
-                            <div className="flex gap-2">
-                                <button onClick={() => { alert('Settings saved (demo)'); }} className="px-4 py-2 bg-golden-orange text-espresso rounded">Save</button>
+                                <div className="flex gap-2">
+                                <button onClick={() => { toast('Settings saved (demo)', 'success'); }} className="px-4 py-2 bg-golden-orange text-espresso rounded">Save</button>
                                 <button onClick={() => setSettings({ ...settingsDefaults })} className="px-4 py-2 bg-white/5 text-cream rounded">Reset</button>
                             </div>
                         </div>
                     )}
+                    {/* Modals */}
+                    {confirmPayload && (
+                        <ConfirmModal open={confirmOpen} title={confirmPayload.title} message={confirmPayload.message} danger={confirmPayload.danger} onConfirm={confirmPayload.onConfirm} onCancel={() => setConfirmOpen(false)} />
+                    )}
+
+                    <Modal open={rejectModalOpen} title={`Reject user`} onClose={() => setRejectModalOpen(false)} footer={
+                        <div className="flex justify-end gap-2">
+                            <button onClick={() => setRejectModalOpen(false)} className="px-3 py-1 rounded text-cream/60 hover:text-golden-orange">Cancel</button>
+                            <button onClick={async () => {
+                                try {
+                                    if (rejectTarget) await userAPI.rejectVerification(parseInt(rejectTarget.id), rejectReason);
+                                    if (rejectVerification && rejectTarget) rejectVerification(rejectTarget.id, rejectReason);
+                                    setLocalVerifications(prev => prev.map(x => x.id === (rejectTarget?.id) ? { ...x, status: 'Rejected', notes: rejectReason } : x));
+                                    setLocalActivity(prev => [{ id: 'a' + Date.now(), date: new Date().toISOString(), actor: 'Admin', action: `Rejected verification ${rejectTarget?.name || ''}` , details: rejectReason}, ...prev]);
+                                    toast('User rejected and notified.', 'info');
+                                    setRejectModalOpen(false);
+                                } catch (err: any) {
+                                    console.error(err);
+                                    toast('Failed to reject verification.', 'error');
+                                }
+                            }} className="px-3 py-1 rounded bg-red-600 text-white">Reject</button>
+                        </div>
+                    }>
+                        <div>
+                            <label className="text-cream/70 text-xs">Reason</label>
+                            <textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)} className="w-full p-2 rounded bg-black/10 text-cream border border-white/5" />
+                        </div>
+                    </Modal>
+
+                    <Modal open={suspendModalOpen} title={`Suspend user`} onClose={() => setSuspendModalOpen(false)} footer={
+                        <div className="flex justify-end gap-2">
+                            <button onClick={() => setSuspendModalOpen(false)} className="px-3 py-1 rounded text-cream/60 hover:text-golden-orange">Cancel</button>
+                            <button onClick={async () => {
+                                try {
+                                    if (suspendTarget) await adminAPI.updateUser(parseInt(suspendTarget.id), { status: 'Suspended', reason: suspendReason });
+                                    if (updateUserStatus && suspendTarget) updateUserStatus(suspendTarget.id, 'Suspended', suspendReason);
+                                    setLocalActivity(prev => [{ id: 'a' + Date.now(), date: new Date().toISOString(), actor: 'Admin', action: `Suspended user ${suspendTarget?.id || ''}` , details: suspendReason}, ...prev]);
+                                    toast('User suspended.', 'info');
+                                    setSuspendModalOpen(false);
+                                } catch (err: any) {
+                                    console.error(err);
+                                    toast('Failed to suspend user.', 'error');
+                                }
+                            }} className="px-3 py-1 rounded bg-red-600 text-white">Suspend</button>
+                        </div>
+                    }>
+                        <div>
+                            <label className="text-cream/70 text-xs">Reason</label>
+                            <textarea value={suspendReason} onChange={e => setSuspendReason(e.target.value)} className="w-full p-2 rounded bg-black/10 text-cream border border-white/5" />
+                        </div>
+                    </Modal>
+
+                    <Modal open={productRejectModalOpen} title={`Reject ${productRejectField}`} onClose={() => setProductRejectModalOpen(false)} footer={
+                        <div className="flex justify-end gap-2">
+                            <button onClick={() => setProductRejectModalOpen(false)} className="px-3 py-1 rounded text-cream/60 hover:text-golden-orange">Cancel</button>
+                            <button onClick={() => {
+                                if (!productRejectTarget || !updateProduct) return;
+                                const field = productRejectField;
+                                if (field === 'product') {
+                                    updateProduct(productRejectTarget.id, { approval: { images: 'Rejected', price: 'Rejected', description: 'Rejected', status: 'Rejected', notes: productRejectReason } });
+                                    setLocalActivity(prev => [{ id: 'a' + Date.now(), date: new Date().toISOString(), actor: 'Admin', action: `Rejected product ${productRejectTarget.name}`, details: productRejectReason }, ...prev]);
+                                } else {
+                                    updateProduct(productRejectTarget.id, { approval: { ...(productRejectTarget.approval || {}), [field]: 'Rejected', status: 'Rejected', notes: productRejectReason } });
+                                }
+                                toast('Rejection recorded.', 'info');
+                                setProductRejectModalOpen(false);
+                            }} className="px-3 py-1 rounded bg-red-600 text-white">Reject</button>
+                        </div>
+                    }>
+                        <div>
+                            <label className="text-cream/70 text-xs">Reason</label>
+                            <textarea value={productRejectReason} onChange={e => setProductRejectReason(e.target.value)} className="w-full p-2 rounded bg-black/10 text-cream border border-white/5" />
+                        </div>
+                    </Modal>
+
+                    <Modal open={!!selectedDoc} title={selectedDoc?.title || 'Document'} onClose={() => setSelectedDoc(null)}>
+                        <pre className="text-cream text-xs whitespace-pre-wrap">{selectedDoc?.body}</pre>
+                    </Modal>
         </main>
       </div>
     </div>

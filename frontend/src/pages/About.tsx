@@ -1,7 +1,7 @@
 import React from 'react';
 import { Diamond, Clock, Globe, Sparkles, Shield, Leaf, AlertCircle, Lightbulb, TrendingUp, Zap } from 'lucide-react';
 
-export const About: React.FC = () => {
+export const About = () => {
   return (
     <div className="min-h-screen bg-espresso animate-fade-in">
        {/* Header */}

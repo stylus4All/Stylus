@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ShieldCheck, FileText, Sparkles, Lock, ShoppingBag, Trash2, ArrowRight, Wallet, AlertTriangle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { useCart } from '../context/CartContext';
 import { useOrders } from '../context/OrderContext';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../components/ToastProvider';
+import ConfirmModal from '../components/ConfirmModal';
+import Modal from '../components/Modal';
 
 interface InfoPageProps {
   type: 'privacy' | 'terms' | 'authenticity' | 'edit' | 'bag';
@@ -16,52 +19,56 @@ export const InfoPage: React.FC<InfoPageProps> = ({ type }) => {
   const { currentUser, updateWallet, transferFunds, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const handleCheckout = () => {
+    const toast = useToast();
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [confirmPayload, setConfirmPayload] = useState<any | null>(null);
+
+    const handleCheckout = () => {
     if (!isAuthenticated || !currentUser) {
-        navigate('/login', { state: { from: { pathname: '/bag' } } });
-        return;
+      navigate('/login', { state: { from: { pathname: '/bag' } } });
+      return;
     }
     
     if (currentUser.status === 'Suspended') {
-        alert("Transaction Declined: Your account is currently suspended.");
-        return;
+      toast("Transaction Declined: Your account is currently suspended.", 'error');
+      return;
     }
 
     if (currentUser.walletBalance < cartTotal) {
-        if(confirm(`Insufficient funds in your wallet (₦${currentUser.walletBalance.toFixed(2)}). Total needed: ₦${cartTotal.toFixed(2)}.\n\nWould you like to go to your dashboard to fund your wallet?`)) {
-            navigate('/dashboard');
-        }
-        return;
+      setConfirmPayload({
+        title: 'Insufficient Funds',
+        message: `Insufficient funds in your wallet (₦${currentUser.walletBalance.toFixed(2)}). Total needed: ₦${cartTotal.toFixed(2)}.\n\nGo to your dashboard to fund your wallet?`,
+        onConfirm: () => { navigate('/dashboard'); setConfirmOpen(false); }
+      });
+      setConfirmOpen(true);
+      return;
     }
 
-    if(confirm(`Confirm payment of ₦${cartTotal.toFixed(2)} from your wallet?`)) {
-        
-        // Process Payments for each item
+    setConfirmPayload({
+      title: 'Confirm Payment',
+      message: `Confirm payment of ₦${cartTotal.toFixed(2)} from your wallet?`,
+      onConfirm: () => {
         cart.forEach(item => {
-             const ownerId = item.product.ownerId;
-             if (item.type === 'buy') {
-                 // Immediate Transfer for Purchases
-                 if (ownerId && ownerId !== 'stylus-official') {
-                     transferFunds(currentUser.id, ownerId, item.price, `Sale Earnings: ${item.product.name}`);
-                 } else {
-                     // Pay to Platform (Admin/Burn)
-                     updateWallet(currentUser.id, -item.price, `Purchase: ${item.product.name}`, 'Debit');
-                 }
+           const ownerId = item.product.ownerId;
+           if (item.type === 'buy') {
+             if (ownerId && ownerId !== 'stylus-official') {
+               transferFunds(currentUser.id, ownerId, item.price, `Sale Earnings: ${item.product.name}`);
              } else {
-                 // Rent: Deduct from user now. Partner gets credited later upon approval in Dashboard.
-                 updateWallet(currentUser.id, -item.price, `Rental Hold: ${item.product.name}`, 'Debit');
+               updateWallet(currentUser.id, -item.price, `Purchase: ${item.product.name}`, 'Debit');
              }
+           } else {
+             updateWallet(currentUser.id, -item.price, `Rental Hold: ${item.product.name}`, 'Debit');
+           }
         });
-        
-        // Add current cart to order history
         addOrder(cart, cartTotal, currentUser.id, currentUser.name);
-        
-        // Clear cart and redirect
-        alert("Payment processed successfully. Rentals sent for approval. Purchases are confirmed.");
+        toast("Payment processed successfully. Rentals sent for approval. Purchases are confirmed.", 'success');
         clearCart();
         navigate('/dashboard');
-    }
-  };
+        setConfirmOpen(false);
+      }
+    });
+    setConfirmOpen(true);
+    };
   
   // Content definitions...
   const content = {
@@ -221,6 +228,9 @@ export const InfoPage: React.FC<InfoPageProps> = ({ type }) => {
 
   return (
     <div className="min-h-screen bg-espresso pt-20 pb-20 animate-fade-in">
+      {confirmPayload && (
+        <ConfirmModal open={confirmOpen} title={confirmPayload.title} message={confirmPayload.message} danger={confirmPayload.danger} onConfirm={confirmPayload.onConfirm} onCancel={() => setConfirmOpen(false)} />
+      )}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="flex justify-center">
           {current.icon}

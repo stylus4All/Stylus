@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { Button } from './Button';
-import { FileText, Upload, Building2, Check, User, CreditCard, ChevronDown } from 'lucide-react';
+import { FileText, Upload, Building2, Check, User, CreditCard } from 'lucide-react';
+import CustomSelect from './CustomSelect';
 
 interface PartnerVerificationFormProps {
     onSubmit: (data: any) => void;
@@ -84,17 +85,12 @@ export const PartnerVerificationForm: React.FC<PartnerVerificationFormProps> = (
                             <div>
                                 <label className="text-[10px] uppercase text-cream/50 mb-1 block">ID Type</label>
                                 <div className="relative">
-                                    <select 
-                                        value={idType} 
-                                        onChange={(e) => setIdType(e.target.value)}
-                                        className="w-full bg-black/20 border border-white/10 text-cream p-3 appearance-none focus:border-golden-orange outline-none cursor-pointer text-sm"
-                                    >
-                                        <option value="NIN">NIN (National ID)</option>
-                                        <option value="International Passport">Int'l Passport</option>
-                                        <option value="Drivers License">Driver's License</option>
-                                        <option value="Voters Card">Voter's Card</option>
-                                    </select>
-                                    <ChevronDown className="absolute right-3 top-3 text-cream/30 pointer-events-none" size={14}/>
+                                    <CustomSelect
+                                        options={[ 'NIN (National ID)', "Int'l Passport", "Driver's License", "Voter's Card" ]}
+                                        value={idType}
+                                        onChange={(v) => setIdType(v)}
+                                        placeholder="Select ID type"
+                                    />
                                 </div>
                             </div>
                             

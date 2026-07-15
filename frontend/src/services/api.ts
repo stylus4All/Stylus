@@ -144,3 +144,15 @@ export const transactionAPI = {
     apiCall(`/transactions/${id}/withdrawal/process`, { method: 'POST' }),
   transfer: (data: any) => apiCall('/transactions/transfer', { method: 'POST', body: JSON.stringify(data) }),
 };
+
+// Admin APIs (requires admin-auth token)
+export const adminAPI = {
+  getOverview: () => apiCall('/admin/overview'),
+  getUsers: () => apiCall('/admin/users'),
+  updateUser: (id: number | string, data: any) => apiCall(`/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  getProducts: () => apiCall('/admin/products'),
+  updateProduct: (id: number | string, data: any) => apiCall(`/admin/products/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  getOrders: () => apiCall('/admin/orders'),
+  updateOrderStatus: (id: string, data: any) => apiCall(`/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteOrder: (id: string) => apiCall(`/admin/orders/${id}`, { method: 'DELETE' }),
+};

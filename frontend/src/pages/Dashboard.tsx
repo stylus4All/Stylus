@@ -11,6 +11,8 @@ import { UserVerificationForm } from '../components/UserVerificationForm';
 import { PartnerVerificationForm } from '../components/PartnerVerificationForm';
 import { DashboardAlert, DashboardAlertType } from '../components/Alert/DashboardAlert';
 import { checkRentalThreshold } from '../services/geminiService';
+import { useToast } from '../components/ToastProvider';
+import ConfirmModal from '../components/ConfirmModal';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -146,37 +148,36 @@ export const Dashboard: React.FC = () => {
   // Partner Action: Accept specific Item
   const handleAcceptItem = (orderId: string, itemId: string, productId: string, price: number) => {
       if (currentUser?.status === 'Suspended') {
-          alert("Action Blocked: Your account is suspended.");
+          toast('Action Blocked: Your account is suspended.', 'error');
           return;
       }
       updateOrderItemStatus(orderId, itemId, 'Accepted');
       incrementRentalCount(productId);
-      
       // Credit Partner Wallet immediately upon acceptance (System release funds)
       updateWallet(currentUser!.id, price, `Rental Earnings: Order #${orderId}`, 'Credit');
-      
-      alert("Item accepted. Funds credited to wallet.");
+      toast('Item accepted. Funds credited to wallet.', 'success');
   };
 
   const handleRejectItem = (orderId: string, itemId: string) => {
-      if (currentUser?.status === 'Suspended') {
-           alert("Action Blocked: Your account is suspended.");
-           return;
-      }
-      
-      const order = orders.find(o => o.id === orderId);
-      const item = order?.items.find(i => i.id === itemId);
-      
-      if (!order || !item) return;
-
-      if (confirm(`Are you sure you want to DECLINE this request for ${item.product.name}?\n\nThis will trigger an immediate full refund of $${item.price} to the customer.`)) {
-        updateOrderItemStatus(orderId, itemId, 'Rejected');
-        
-        // Refund Logic: Credit back the user who placed the order
-        updateWallet(order.userId, item.price, `Refund: Request Declined for ${item.product.name}`, 'Credit');
-        
-        alert("Item rejected. Customer has been refunded.");
-      }
+            if (currentUser?.status === 'Suspended') {
+                     toast('Action Blocked: Your account is suspended.', 'error');
+                     return;
+            }
+            const order = orders.find(o => o.id === orderId);
+            const item = order?.items.find(i => i.id === itemId);
+            if (!order || !item) return;
+            setConfirmPayload({
+                title: 'Decline Request',
+                message: `Are you sure you want to DECLINE this request for ${item.product.name}?\n\nThis will trigger an immediate full refund of $${item.price} to the customer.`,
+                danger: true,
+                onConfirm: () => {
+                    updateOrderItemStatus(orderId, itemId, 'Rejected');
+                    updateWallet(order.userId, item.price, `Refund: Request Declined for ${item.product.name}`, 'Credit');
+                    toast('Item rejected. Customer has been refunded.', 'info');
+                    setConfirmOpen(false);
+                }
+            });
+            setConfirmOpen(true);
   };
 
   // --- Partner Listing Logic ---
@@ -188,11 +189,11 @@ export const Dashboard: React.FC = () => {
   const handleAddItem = (e: React.FormEvent) => {
     e.preventDefault();
     if (currentUser?.status === 'Suspended') {
-        alert("Action Blocked: Your account is suspended.");
+        toast('Action Blocked: Your account is suspended.', 'error');
         return;
     }
     if(currentUser?.verificationStatus !== 'Verified') {
-        alert("You must be a verified partner to list items.");
+        toast('You must be a verified partner to list items.', 'error');
         return;
     }
     const product: Product = {
@@ -214,16 +215,20 @@ export const Dashboard: React.FC = () => {
         reviews: [],
         rentalCount: 0
     };
-    addProduct(product);
-    alert("Item listed successfully! It is now visible globally.");
+        addProduct(product);
+        toast('Item listed successfully! It is now visible globally.', 'success');
     setCurrentView('listings');
   };
 
-  const handleRemoveItem = (id: string) => {
-    if(confirm("Are you sure you want to remove this item from your store? This cannot be undone.")) {
-      removeProduct(id);
-    }
-  };
+    const handleRemoveItem = (id: string) => {
+        setConfirmPayload({
+            title: 'Remove Item',
+            message: 'Are you sure you want to remove this item from your store? This cannot be undone.',
+            danger: true,
+            onConfirm: () => { removeProduct(id); setConfirmOpen(false); }
+        });
+        setConfirmOpen(true);
+    };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -240,6 +245,10 @@ export const Dashboard: React.FC = () => {
   };
 
   if (!currentUser) return null;
+
+    const toast = useToast();
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [confirmPayload, setConfirmPayload] = useState<any | null>(null);
 
   // Suspension Overlay
   if (currentUser.status === 'Suspended') {
@@ -348,6 +357,9 @@ export const Dashboard: React.FC = () => {
               </div>
           </div>
       )}
+            {confirmPayload && (
+                <ConfirmModal open={confirmOpen} title={confirmPayload.title} message={confirmPayload.message} danger={confirmPayload.danger} onConfirm={confirmPayload.onConfirm} onCancel={() => setConfirmOpen(false)} />
+            )}
 
       {/* Fund Wallet Payment Modal */}
       {fundModal && (

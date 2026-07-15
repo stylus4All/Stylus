@@ -159,3 +159,13 @@ model Transaction {
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   order                 Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
 }
+
+model AdminAudit {
+  id        Int      @id @default(autoincrement())
+  actorId   Int?
+  actorName String?
+  action    String
+  details   String?
+  ip        String?
+  createdAt DateTime @default(now())
+}

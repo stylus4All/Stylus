@@ -44,7 +44,7 @@ const CustomSelect: React.FC<Props> = ({ options, value, onChange, className = '
       </button>
 
       {open && portalPos && createPortal(
-        <ul style={{ position: 'fixed', left: portalPos.left, top: portalPos.top, width: portalPos.width, zIndex: 9999 }} className="max-h-60 overflow-auto bg-[#1f0c05] border border-white/10 rounded-sm p-1 shadow-lg">
+        <ul style={{ position: 'fixed', left: portalPos.left, top: portalPos.top, width: portalPos.width, zIndex: 9999 }} className="max-h-60 overflow-auto bg-[#1f0c05] border border-white/10 rounded-sm p-1 shadow-lg animate-pop-in">
           {options.map(opt => (
             <li key={opt}>
               <button

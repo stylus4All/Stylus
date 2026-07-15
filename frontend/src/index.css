@@ -94,3 +94,21 @@ select {
   -moz-appearance: none;
   appearance: none;
 }
+
+/* Toast animations */
+@keyframes toast-in {
+  from { transform: translateX(12px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.animate-toast-in {
+  animation: toast-in 240ms cubic-bezier(.2,.8,.2,1);
+}
+
+/* Dropdown (CustomSelect) subtle pop */
+@keyframes pop-in {
+  from { transform: scale(0.98); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.animate-pop-in {
+  animation: pop-in 180ms ease-out;
+}

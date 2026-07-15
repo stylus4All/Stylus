@@ -3,6 +3,7 @@ import { authenticateToken, requireAdmin } from '../middleware/auth';
 import { userService } from '../services/userService';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
+import { auditService } from '../services/auditService';
 import { prisma } from '../prisma';
 
 const router = Router();
@@ -45,6 +46,8 @@ router.patch('/users/:id', async (req: Request, res: Response) => {
     if (adminNotes !== undefined) await userService.updateUser(id, { adminNotes });
 
     const user = await userService.getUserById(id);
+    // audit
+    try { await auditService.create({ actorId: (req as any).user?.userId, actorName: (req as any).user?.email, action: 'update_user', details: JSON.stringify({ id, role, status, reason, adminNotes }), ip: req.ip }); } catch(e){}
     res.json(user);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -64,6 +67,7 @@ router.get('/products', async (_req: Request, res: Response) => {
 router.patch('/products/:id', async (req: Request, res: Response) => {
   try {
     const product = await productService.updateProduct(req.params.id, req.body);
+    try { await auditService.create({ actorId: (req as any).user?.userId, actorName: (req as any).user?.email, action: 'update_product', details: JSON.stringify({ id: req.params.id, body: req.body }), ip: req.ip }); } catch(e){}
     res.json(product);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -85,6 +89,7 @@ router.patch('/orders/:id/status', async (req: Request, res: Response) => {
     const { status } = req.body;
     if (!status) return res.status(400).json({ error: 'Status required' });
     const order = await orderService.updateOrderStatus(req.params.id, status);
+    try { await auditService.create({ actorId: (req as any).user?.userId, actorName: (req as any).user?.email, action: 'update_order_status', details: JSON.stringify({ id: req.params.id, status }), ip: req.ip }); } catch(e){}
     res.json(order);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -94,6 +99,7 @@ router.patch('/orders/:id/status', async (req: Request, res: Response) => {
 router.delete('/orders/:id', async (req: Request, res: Response) => {
   try {
     const order = await orderService.deleteOrder(req.params.id);
+    try { await auditService.create({ actorId: (req as any).user?.userId, actorName: (req as any).user?.email, action: 'delete_order', details: JSON.stringify({ id: req.params.id }), ip: req.ip }); } catch(e){}
     res.json({ message: 'Order deleted', order });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

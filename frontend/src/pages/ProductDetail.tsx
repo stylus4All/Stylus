@@ -6,6 +6,7 @@ import { useProduct } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../components/ToastProvider';
 import { getDeliveryEstimate } from '../services/geminiService';
 
 export const ProductDetail: React.FC = () => {
@@ -16,6 +17,7 @@ export const ProductDetail: React.FC = () => {
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { currentUser, isAuthenticated } = useAuth();
+    const toast = useToast();
   
   const product = products.find(p => p.id === id);
   
@@ -155,11 +157,11 @@ export const ProductDetail: React.FC = () => {
           return false;
       }
       if (currentUser?.status === 'Suspended') {
-          alert("Account Suspended: You cannot perform transactions.");
+          toast("Account Suspended: You cannot perform transactions.", 'error');
           return false;
       }
       if (currentUser?.verificationStatus !== 'Verified') {
-          alert("Action Restricted: Please complete your identity verification in the Dashboard to Rent or Buy.");
+          toast("Action Restricted: Please complete your identity verification in the Dashboard to Rent or Buy.", 'warning');
           return false;
       }
       return true;
@@ -167,8 +169,8 @@ export const ProductDetail: React.FC = () => {
 
   const handleTransaction = (type: 'rent' | 'buy') => {
     if (!checkAccess()) return;
-    if (!selectedSize) { alert("Please select a size."); return; }
-    if (type === 'rent' && (!startDate || !agreedToTerms)) { alert("Please select dates and agree to terms."); return; }
+    if (!selectedSize) { toast("Please select a size.", 'error'); return; }
+    if (type === 'rent' && (!startDate || !agreedToTerms)) { toast("Please select dates and agree to terms.", 'error'); return; }
 
     addToCart({
         id: `${product.id}-${Date.now()}`,
@@ -180,7 +182,7 @@ export const ProductDetail: React.FC = () => {
         startDate: type === 'rent' && startDate ? startDate.toLocaleDateString() : undefined,
         endDate: type === 'rent' && startDate ? getEndDate()?.toLocaleDateString() : undefined
     });
-    alert(`${type === 'rent' ? 'Rental' : 'Purchase'} added to bag.`);
+        toast(`${type === 'rent' ? 'Rental' : 'Purchase'} added to bag.`, 'success');
   };
 
   const togglePolicy = (policy: string) => {

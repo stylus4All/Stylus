@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { Button } from './Button';
-import { Upload, ChevronDown, Check } from 'lucide-react';
+import { Upload, Check } from 'lucide-react';
+import CustomSelect from './CustomSelect';
 
 interface UserVerificationFormProps {
     onSubmit: (data: any) => void;
@@ -36,17 +37,12 @@ export const UserVerificationForm: React.FC<UserVerificationFormProps> = ({ onSu
                     <div>
                         <label className="text-xs uppercase text-cream/50 mb-1 block">Identification Type</label>
                         <div className="relative mb-2">
-                            <select 
-                                value={idType} 
-                                onChange={(e) => setIdType(e.target.value)}
-                                className="w-full bg-black/20 border border-white/10 text-cream p-3 appearance-none focus:border-golden-orange outline-none cursor-pointer"
-                            >
-                                <option value="NIN">National Identity Number (NIN)</option>
-                                <option value="DriversLicense">Driver's License</option>
-                                <option value="Passport">International Passport</option>
-                                <option value="VotersCard">Voter's Card</option>
-                            </select>
-                            <ChevronDown className="absolute right-3 top-3 text-cream/30 pointer-events-none" size={16}/>
+                            <CustomSelect
+                                options={[ 'National Identity Number (NIN)', "Driver's License", 'International Passport', "Voter's Card" ]}
+                                value={idType}
+                                onChange={(v) => setIdType(v)}
+                                placeholder="Select ID type"
+                            />
                         </div>
                     </div>
 

@@ -54,6 +54,7 @@ interface AuthContextType {
   requestWithdrawal: (id: string, amount: number, bankDetails: string) => void;
   processWithdrawal: (transactionId: string) => void;
   deleteUser: (id: string) => void;
+  refreshUserFromBackend: (id: string) => Promise<void>;
   addToSearchHistory: (query: string) => void;
 }
 
@@ -457,6 +458,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw error;
     }
   };
+
+  const refreshUserFromBackend = async (id: string) => {
+    try {
+      const backendUser = await userAPI.getById(parseInt(id));
+      const mapped = mapBackendUserToRegisteredUser(backendUser);
+      setRegisteredUsers(prev => prev.map(u => u.id === id ? mapped : u));
+      if (currentUser?.id === id) setCurrentUser(mapped);
+    } catch (err) {
+      console.error('Failed to refresh user from backend', err);
+    }
+  };
   
   const transferFunds = (fromId: string, toId: string, amount: number, description: string) => {
       // Deduct from Sender
@@ -535,6 +547,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       approveVerification,
       rejectVerification,
       updateWallet,
+      refreshUserFromBackend,
       transferFunds,
       requestWithdrawal,
       processWithdrawal,

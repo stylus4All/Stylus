@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, Clock, MessageSquare } from 'lucide-react';
 import { Button } from '../components/Button';
+import CustomSelect from '../components/CustomSelect';
+import { useToast } from '../components/ToastProvider';
 
 export const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +11,7 @@ export const Contact: React.FC = () => {
     subject: '',
     message: ''
   });
+    const toast = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -17,11 +20,11 @@ export const Contact: React.FC = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert('Thank you for contacting Stylus! We\'ll respond to your message shortly.');
-    setFormData({ name: '', email: '', subject: '', message: '' });
-  };
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        toast('Thank you for contacting Stylus! We\'ll respond to your message shortly.', 'success');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+    };
 
   return (
     <div className="min-h-screen bg-espresso pt-12 pb-24 animate-fade-in relative overflow-hidden">
@@ -143,20 +146,12 @@ export const Contact: React.FC = () => {
                            {/* Subject */}
                            <div>
                                <label className="text-xs text-golden-orange uppercase tracking-widest mb-3 block font-semibold">Subject *</label>
-                               <select 
-                                   name="subject"
+                               <CustomSelect
+                                   options={["", 'General Inquiry', 'Rental Assistance', 'Stylist Consultation', 'Partnership Opportunity', 'Technical Support']}
                                    value={formData.subject}
-                                   onChange={handleChange}
-                                   required
-                                   className="w-full bg-espresso/50 border border-golden-orange/20 p-4 text-cream focus:border-golden-orange focus:bg-espresso focus:ring-2 focus:ring-golden-orange/30 outline-none rounded-lg transition-all duration-300 appearance-none cursor-pointer"
-                               >
-                                   <option value="">Select a subject...</option>
-                                   <option>General Inquiry</option>
-                                   <option>Rental Assistance</option>
-                                   <option>Stylist Consultation</option>
-                                   <option>Partnership Opportunity</option>
-                                   <option>Technical Support</option>
-                               </select>
+                                   onChange={(v) => setFormData({ ...formData, subject: v })}
+                                   placeholder="Select a subject..."
+                               />
                            </div>
 
                            {/* Message */}
